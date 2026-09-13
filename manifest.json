@@ -2,7 +2,7 @@
   "name": "W & H",
   "short_name": "W & H",
   "description": "Wedding & Honeymoon Planner",
-  "start_url": "./index.html",
+  "start_url": ".",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#Faf9f7",
