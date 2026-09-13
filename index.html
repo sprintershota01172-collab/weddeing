@@ -8,6 +8,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="W & H">
+  <!-- アプリ化した際の下部（セーフエリア）の白浮きを防ぐテーマカラー -->
+  <meta name="theme-color" content="#0077B6">
   
   <link rel="manifest" href="manifest.json">
   <link id="apple-touch-icon" rel="apple-touch-icon" href="">
@@ -66,12 +68,18 @@
 
   <style>
     *, *::before, *::after { box-sizing: border-box; }
-    body, html { 
-        background: linear-gradient(135deg, #48CAE4 0%, #0077B6 100%);
-        background-attachment: fixed;
-        -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; overflow: hidden; height: 100dvh; width: 100vw; color: #03045E; 
+    
+    html {
+        /* 最下部の隙間が白くなるのを防ぐためのベースカラー */
+        background-color: #0077B6;
     }
-    .app-container { height: 100dvh; max-height: 100dvh; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+    body, html { 
+        background-image: linear-gradient(135deg, #48CAE4 0%, #0077B6 100%);
+        background-attachment: fixed;
+        background-size: cover;
+        -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; overflow: hidden; height: 100%; width: 100%; color: #03045E; 
+    }
+    .app-container { height: 100%; min-height: 100dvh; display: flex; flex-direction: column; position: relative; overflow: hidden; }
     .hide-scroll { scroll-behavior: smooth; }
     .hide-scroll::-webkit-scrollbar { display: none; }
     .fade-enter-active, .fade-leave-active { transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -370,7 +378,7 @@
             <!-- IDEAS -->
             <div v-if="travelSubTab === 'ideas'" class="flex-1 overflow-y-auto hide-scroll pb-2 flex flex-col space-y-3">
               <div v-if="destinations.length === 0" class="text-center py-16 text-theme-subtext flex-shrink-0 glass-panel rounded-[24px] shadow-soft">
-                <i class="fas fa-map-marked-alt text-5xl mb-3 opacity-50"></i>
+                <i class="fas fa-map-marked-alt text-5xl mb-3 opacity-60"></i>
                 <p class="text-xs font-bold mt-2">行き先候補が登録されていません</p>
                 <button @click="openDestinationModal()" class="mt-4 px-4 py-2 bg-theme-primary text-white text-xs font-bold rounded-full shadow-md active:scale-95 transition-all">
                   <i class="fas fa-plus mr-1"></i>最初の候補を追加する
@@ -535,7 +543,7 @@
             <!-- ITINERARY -->
             <div v-else class="flex-1 overflow-y-auto hide-scroll pb-2 flex flex-col">
               <div v-if="travels.length === 0" class="text-center py-16 text-theme-subtext flex-shrink-0 glass-panel rounded-[24px] shadow-soft">
-                <i class="fas fa-suitcase-rolling text-5xl mb-3 opacity-50"></i>
+                <i class="fas fa-suitcase-rolling text-5xl mb-3 opacity-60"></i>
                 <p class="text-xs font-bold mt-2">日程が登録されていません</p>
                 <button @click="openTravelModal(null)" class="mt-4 px-4 py-2 bg-theme-primary text-white text-xs font-bold rounded-full shadow-md active:scale-95 transition-all"><i class="fas fa-calendar-plus mr-1"></i>日程を登録する</button>
               </div>
@@ -689,7 +697,7 @@
             </div>
             <div class="flex-1 overflow-y-auto hide-scroll space-y-2.5 pb-2">
               <div v-if="savings.length === 0" class="text-center py-10 text-theme-subtext flex-shrink-0 glass-panel rounded-[20px] shadow-soft">
-                <i class="fas fa-piggy-bank text-4xl mb-2 opacity-50"></i>
+                <i class="fas fa-piggy-bank text-4xl mb-2 opacity-60"></i>
                 <p class="text-[11px] font-bold mt-2">貯金記録がありません</p>
               </div>
               <transition-group name="list" tag="div" class="space-y-2.5">
@@ -1033,18 +1041,18 @@
             <div class="space-y-4">
               <div>
                 <label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">結婚式の日程</label>
-                <input v-model="settings.weddingDate" type="date" class="w-full box-border appearance-none rounded-xl px-3 py-2.5 text-[12px] font-bold bg-white/70 border border-white focus:border-theme-primary/50 transition-all m-0 shadow-inner">
+                <input v-model="settings.weddingDate" type="date" class="w-full box-border appearance-none rounded-xl px-3 py-2.5 text-[12px] font-bold bg-white/70 border border-white focus:border-theme-primary/50 transition-all m-0 shadow-inner text-theme-text">
               </div>
               <div>
                 <label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">新婚旅行 出発日</label>
-                <input v-model="settings.honeymoonDate" type="date" class="w-full box-border appearance-none rounded-xl px-3 py-2.5 text-[12px] font-bold bg-white/70 border border-white focus:border-theme-primary/50 transition-all m-0 shadow-inner">
+                <input v-model="settings.honeymoonDate" type="date" class="w-full box-border appearance-none rounded-xl px-3 py-2.5 text-[12px] font-bold bg-white/70 border border-white focus:border-theme-primary/50 transition-all m-0 shadow-inner text-theme-text">
               </div>
 
               <div class="border-t border-white/60 pt-3">
                 <h4 class="text-[12px] font-bold text-theme-text mb-2"><i class="fas fa-user-friends mr-1.5 text-theme-primary"></i>担当者の登録</h4>
                 <div class="space-y-2">
                   <div v-for="(assignee, idx) in settings.assignees" :key="'assignee-'+idx" class="flex gap-2">
-                    <input v-model="settings.assignees[idx]" type="text" class="flex-1 box-border m-0 px-3 py-2 rounded-xl text-[12px] font-bold bg-white/70 border border-white focus:border-theme-primary/50 transition-all shadow-inner placeholder-theme-subtext/50" placeholder="お名前を入力">
+                    <input v-model="settings.assignees[idx]" type="text" class="flex-1 box-border m-0 px-3 py-2 rounded-xl text-[12px] font-bold bg-white/70 border border-white focus:border-theme-primary/50 transition-all shadow-inner placeholder-theme-subtext/50 text-theme-text" placeholder="お名前を入力">
                     <button @click="removeAssignee(idx)" class="w-8 h-8 flex items-center justify-center bg-theme-primary/10 text-theme-primary rounded-xl active:scale-95 transition-all"><i class="fas fa-minus"></i></button>
                   </div>
                   <button @click="addAssignee" class="w-full py-2 bg-white/60 text-theme-subtext border border-white rounded-xl text-[11px] font-bold active:scale-95 transition-all hover:bg-white"><i class="fas fa-plus mr-1"></i>担当者を追加</button>
@@ -1056,7 +1064,7 @@
                 <div class="space-y-2">
                   <div v-for="(cat, idx) in settings.categories" :key="'cat-edit-'+cat.id" class="flex gap-2 items-center bg-white/60 p-1.5 rounded-xl border border-white shadow-sm">
                     <input type="color" v-model="cat.color" class="w-8 h-8 rounded-lg cursor-pointer flex-shrink-0 border-0 p-0 m-0 bg-transparent">
-                    <input v-model="cat.label" type="text" class="flex-1 box-border m-0 px-2 py-1.5 rounded-lg text-[12px] font-bold bg-white/80 border border-white focus:border-theme-primary/50 transition-all shadow-inner placeholder-theme-subtext/50" placeholder="カテゴリー名">
+                    <input v-model="cat.label" type="text" class="flex-1 box-border m-0 px-2 py-1.5 rounded-lg text-[12px] font-bold bg-white/80 border border-white focus:border-theme-primary/50 transition-all shadow-inner placeholder-theme-subtext/50 text-theme-text" placeholder="カテゴリー名">
                     <button @click="removeCategory(idx)" class="w-8 h-8 flex items-center justify-center text-theme-primary rounded-lg active:scale-90 transition-all flex-shrink-0"><i class="fas fa-trash text-xs"></i></button>
                   </div>
                   <button @click="addCategory" class="w-full py-2 bg-white/60 text-theme-subtext border border-white rounded-xl text-[11px] font-bold active:scale-95 transition-all hover:bg-white"><i class="fas fa-plus mr-1"></i>カテゴリーを追加</button>
@@ -1070,7 +1078,7 @@
                     <label class="w-[70px] text-[10px] font-bold text-theme-subtext truncate" :style="{ color: cat.color }">{{ cat.label }}</label>
                     <div class="flex-1 relative">
                       <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-theme-subtext text-[10px] font-bold">¥</span>
-                      <input v-model.number="settings.budgets[cat.id]" type="number" class="w-full box-border m-0 pl-6 pr-8 py-2 rounded-xl text-[12px] font-bold bg-white/70 border border-white focus:border-theme-primary/50 transition-all shadow-inner">
+                      <input v-model.number="settings.budgets[cat.id]" type="number" class="w-full box-border m-0 pl-6 pr-8 py-2 rounded-xl text-[12px] font-bold bg-white/70 border border-white focus:border-theme-primary/50 transition-all shadow-inner text-theme-text">
                       <button @click="settings.budgets[cat.id] = 0" class="absolute right-2 top-1/2 -translate-y-1/2 text-theme-subtext hover:text-theme-primary w-5 h-5 flex items-center justify-center rounded-full active:bg-white/80 transition-colors"><i class="fas fa-times-circle text-xs"></i></button>
                     </div>
                   </div>
@@ -1111,7 +1119,7 @@
               <div class="bg-white/60 p-3.5 rounded-2xl border border-white shadow-sm">
                 <p class="text-[11px] font-bold text-theme-text mb-2"><i class="fas fa-download mr-1.5 text-theme-primary"></i>2. 相手のデータを受け取る</p>
                 <p class="text-[10px] text-theme-subtext mb-2 leading-relaxed font-bold">パートナーからの同期コードを貼り付けて「反映」を押してください。（※上書きされます）</p>
-                <textarea v-model="shareCodeInput" rows="2" class="w-full box-border rounded-xl px-3 py-2 text-[10px] bg-white/70 border border-white focus:border-theme-primary/50 transition-all shadow-inner placeholder-theme-subtext/50 mb-2 font-bold" placeholder="ここにコードを貼り付け"></textarea>
+                <textarea v-model="shareCodeInput" rows="2" class="w-full box-border rounded-xl px-3 py-2 text-[10px] bg-white/70 border border-white focus:border-theme-primary/50 transition-all shadow-inner placeholder-theme-subtext/50 mb-2 font-bold text-theme-text" placeholder="ここにコードを貼り付け"></textarea>
                 <button @click="importShareCode" :disabled="!shareCodeInput" class="w-full py-2.5 rounded-xl bg-theme-primary text-white font-bold text-[11px] shadow-sm active:scale-95 transition-transform disabled:opacity-50 disabled:active:scale-100">
                   データを反映する
                 </button>
