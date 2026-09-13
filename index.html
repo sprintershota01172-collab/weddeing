@@ -14,14 +14,12 @@
   <link id="favicon" rel="icon" type="image/png" href="">
 
   <script>
-    // PWA Service Worker の自動登録
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').catch(() => {});
       });
     }
 
-    // アプリアイコンの動的生成
     (function() {
       const canvas = document.createElement('canvas');
       canvas.width = 192; canvas.height = 192;
@@ -88,7 +86,9 @@
     .glass-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.5); }
     .safe-pb { padding-bottom: env(safe-area-inset-bottom, 16px); }
     .safe-pt { padding-top: env(safe-area-inset-top, 0px); }
-    input, textarea, select { font-size: 16px !important; outline: none; width: 100%; max-width: 100%; margin: 0; }
+    
+    /* フォントサイズの強制拡大を解除して統一感を出す */
+    input, textarea, select { outline: none; width: 100%; max-width: 100%; margin: 0; font-family: inherit; }
     .break-words { word-wrap: break-word; overflow-wrap: break-word; }
   </style>
 </head>
@@ -197,58 +197,42 @@
 
           <transition name="fade" mode="out-in">
             <!-- 1. TODO リスト表示 -->
-            <div v-if="taskStatusTab === 'todo'" class="flex-1 overflow-y-auto hide-scroll pb-2 flex flex-col space-y-2.5">
-              <div v-for="block in priorityBlocks" :key="block.value" class="bg-white rounded-[20px] p-2.5 shadow-soft border border-white flex flex-col flex-shrink-0">
-                <div class="flex justify-between items-center mb-2 pb-1 border-b border-gray-50">
-                  <h3 class="font-bold text-[11px] flex items-center text-theme-text leading-none">
-                    <i :class="block.iconClass" class="mr-1.5 w-3 text-center"></i>{{ block.label }}
+            <div v-if="taskStatusTab === 'todo'" class="flex-1 grid grid-cols-2 gap-2 overflow-hidden pb-1">
+              <div v-for="block in priorityBlocks" :key="block.value" class="bg-white rounded-[16px] p-2 shadow-soft border border-white flex flex-col overflow-hidden">
+                <div class="flex justify-between items-center mb-1.5 pb-1 border-b border-gray-50 flex-shrink-0">
+                  <h3 class="font-bold text-[10px] flex items-center text-theme-text leading-none">
+                    <i :class="block.iconClass" class="mr-1 w-3 text-center"></i>{{ block.label }}
                   </h3>
-                  <span class="text-[9px] font-bold text-theme-subtext bg-gray-50 px-1.5 py-0.5 rounded-full">{{ getTasksByPriority(block.value).length }}</span>
+                  <span class="text-[8px] font-bold text-theme-subtext bg-gray-50 px-1.5 py-0.5 rounded-full">{{ getTasksByPriority(block.value).length }}</span>
                 </div>
-                
-                <div class="space-y-1">
+                <div class="flex-1 overflow-y-auto hide-scroll space-y-0.5 pr-0.5 -mx-0.5 px-0.5">
                   <div v-if="getTasksByPriority(block.value).length === 0" class="text-center py-2 text-gray-300 text-[9px] font-medium">タスクなし</div>
-                  
-                  <div v-for="task in getTasksByPriority(block.value)" :key="task.id" class="relative overflow-hidden rounded-lg bg-red-50">
-                    <div class="absolute inset-y-0 right-0 w-[50px] flex items-center justify-center text-theme-accent font-bold text-sm"><i class="fas fa-trash"></i></div>
-                    
-                    <div class="flex items-center gap-2 p-1.5 pl-2 rounded-lg bg-white shadow-sm border border-gray-50 hover:bg-gray-50 active:bg-gray-100 transition-all cursor-pointer relative z-10 w-full"
+                  <div v-for="task in getTasksByPriority(block.value)" :key="task.id" class="relative overflow-hidden rounded-md bg-red-50 mb-0.5">
+                    <div class="absolute inset-y-0 right-0 w-[40px] flex items-center justify-center text-theme-accent font-bold text-xs"><i class="fas fa-trash"></i></div>
+                    <div class="flex items-center gap-1.5 p-1 pl-1.5 rounded-md bg-white shadow-sm border border-gray-50 hover:bg-gray-50 active:bg-gray-100 transition-all cursor-pointer relative z-10 w-full h-[26px]"
                          :class="{'transition-transform duration-200': !task.isSwiping}"
                          @touchstart="handleTouchStart($event, task)" @touchmove="handleTouchMove($event, task)" @touchend="handleTouchEnd($event, task, () => deleteSpecificTask(task.id))"
                          @click="safeClick(() => editTask(task))">
-                      
                       <div class="absolute left-0 top-0 bottom-0 w-1" :style="{ backgroundColor: getCategoryDef(task.category).color }"></div>
-
-                      <button @click.stop="toggleTask(task)" class="flex-shrink-0 w-4 h-4 rounded-full border-[1.5px] border-gray-300 flex items-center justify-center transition-all bg-white ml-1">
+                      <button @click.stop="toggleTask(task)" class="flex-shrink-0 w-[14px] h-[14px] rounded-[3px] border border-gray-300 flex items-center justify-center transition-all bg-white ml-0.5 group">
                         <i class="fas fa-check text-[6px] opacity-0 text-theme-primary group-hover:opacity-50"></i>
                       </button>
-                      
-                      <div class="flex-1 flex justify-between items-center min-w-0 pr-1">
-                        <div class="truncate">
-                          <h4 class="font-bold text-[11px] text-theme-text leading-tight truncate mb-0.5">{{ task.title }}</h4>
-                          <div class="flex items-center gap-1.5 text-[8px]">
-                            <span class="text-gray-500">{{ formatShortDate(task.startDate) }}<span v-if="task.startDate !== task.endDate">〜{{ formatShortDate(task.endDate) }}</span></span>
-                            <span v-if="task.assignee" class="bg-gray-100 text-gray-500 px-1 rounded-sm">{{ task.assignee }}</span>
-                          </div>
-                        </div>
-                        <div class="text-right flex-shrink-0 flex flex-col items-end justify-center gap-0.5">
-                          <span class="text-[8px] font-bold px-1.5 py-0.5 rounded-sm whitespace-nowrap text-white leading-none" :style="{ backgroundColor: getCategoryDef(task.category).color }">{{ getCategoryDef(task.category).label }}</span>
-                          <span class="text-[9px] font-bold" :class="isOverdue(task) ? 'text-theme-accent animate-pulse' : 'text-gray-500'">
-                            <span v-if="isOverdue(task)">!遅延</span><span v-else>〆{{ formatShortDate(task.dueDate) }}</span>
-                          </span>
-                        </div>
+                      <div class="flex-1 flex justify-between items-center min-w-0 pr-0.5">
+                        <span class="font-bold text-[9px] text-theme-text truncate leading-none pt-[1px]">{{ task.title }}</span>
+                        <span class="text-[8px] font-bold leading-none flex-shrink-0 ml-1 pt-[1px]" :class="isOverdue(task) ? 'text-theme-accent animate-pulse' : 'text-gray-400'">
+                          <span v-if="isOverdue(task)">!遅延</span><span v-else>{{ formatShortDate(task.dueDate) }}</span>
+                        </span>
                       </div>
                     </div>
                   </div>
-                  
-                  <div @click="openTaskModalWithPriority(block.value)" class="flex items-center justify-center py-1.5 rounded-lg border border-dashed border-gray-200 text-gray-400 hover:text-theme-primary hover:border-theme-primaryLight hover:bg-theme-primaryLight/10 active:bg-gray-50 transition-all cursor-pointer mt-1 group">
+                  <div @click="openTaskModalWithPriority(block.value)" class="flex items-center justify-center h-[24px] rounded-md border border-dashed border-gray-200 text-gray-400 hover:text-theme-primary hover:bg-theme-primaryLight/10 active:bg-gray-50 transition-all cursor-pointer mt-0.5 group">
                     <span class="text-[9px] font-bold group-hover:text-theme-primary"><i class="fas fa-plus mr-1"></i>追加</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- 2. 日程表 (ガントチャート) -->
+            <!-- 2. 日程表 (ガントチャート風) -->
             <div v-else-if="taskStatusTab === 'calendar'" class="flex-1 flex flex-col overflow-hidden pb-1">
               <div class="flex justify-between items-center mb-2 px-2 flex-shrink-0">
                 <div class="flex items-center gap-3">
@@ -258,7 +242,6 @@
                 </div>
                 <button @click="openTaskModal()" class="text-[10px] font-bold text-theme-primary bg-white shadow-sm px-3 py-1.5 rounded-full active:scale-95 transition-all"><i class="fas fa-plus mr-1"></i>TODO追加</button>
               </div>
-              
               <div class="bg-white rounded-[20px] shadow-soft border border-white flex-1 flex flex-col overflow-hidden">
                 <div class="overflow-auto hide-scroll flex-1 relative bg-white">
                   <table class="w-full text-left border-separate border-spacing-0 whitespace-nowrap min-w-max">
@@ -282,7 +265,6 @@
                           </td>
                           <td :colspan="matrixDays.length" class="border-b border-gray-100 bg-gray-50/50 group-hover:bg-gray-100/50 transition-colors"></td>
                         </tr>
-                        
                         <template v-if="expandedTaskCategories.includes(cat.id)">
                           <tr v-if="getTasksByCategory(cat.id).length === 0">
                              <td class="sticky left-0 z-10 px-2 py-1 border-r border-b border-gray-50 bg-white text-gray-300 text-[8px] shadow-[2px_0_4px_rgba(0,0,0,0.02)] text-center h-[20px]">タスクなし</td>
@@ -328,22 +310,18 @@
                 <span class="text-[10px] font-bold text-theme-subtext">完了したタスク ({{ doneTasks.length }})</span>
                 <button v-if="doneTasks.length > 0" @click="clearDoneTasks" class="text-[9px] font-bold text-theme-accent bg-red-50 px-2.5 py-1 rounded-full shadow-sm active:scale-95 transition-transform"><i class="fas fa-trash-alt mr-1"></i>一括削除</button>
               </div>
-
               <div class="flex-1 space-y-2">
                 <div v-if="doneTasks.length === 0" class="text-center py-16 text-gray-300 flex-shrink-0">
                   <i class="far fa-smile text-5xl mb-3 opacity-50"></i>
                   <p class="text-xs font-medium">完了済みのTODOはありません</p>
                 </div>
-
                 <div v-for="task in doneTasks" :key="task.id" class="relative overflow-hidden rounded-lg bg-gray-100 shadow-sm flex-shrink-0">
                   <div class="absolute inset-y-0 right-0 w-[50px] flex items-center justify-center text-theme-accent font-bold"><i class="fas fa-trash"></i></div>
-                  
                   <div class="bg-white p-1.5 pl-2 rounded-lg border border-gray-100 flex items-center gap-2 opacity-60 hover:opacity-100 w-full relative z-10 cursor-pointer border-l-4"
                        :style="{ borderLeftColor: getCategoryDef(task.category).color, transform: `translateX(${task.swipeOffset || 0}px)` }"
                        :class="{'transition-transform duration-200': !task.isSwiping}"
                        @touchstart="handleTouchStart($event, task)" @touchmove="handleTouchMove($event, task)" @touchend="handleTouchEnd($event, task, () => deleteSpecificTask(task.id))"
                        @click="safeClick(() => editTask(task))">
-                       
                     <button @click.stop="toggleTask(task)" class="flex-shrink-0 w-4 h-4 rounded-full border-2 bg-theme-primary border-theme-primary text-white flex items-center justify-center transition-all active:scale-75">
                       <i class="fas fa-check text-[6px]"></i>
                     </button>
@@ -362,9 +340,9 @@
         <!-- TRAVEL TAB -->
         <div v-else-if="activeTab === 'travel'" class="w-full h-full flex flex-col overflow-hidden gap-2">
           <div class="flex p-1 bg-gray-100/80 rounded-2xl flex-shrink-0 shadow-inner mb-1">
-            <button @click="travelSubTab = 'ideas'" class="flex-1 py-1.5 rounded-xl text-xs font-bold transition-all" 
+            <button @click="travelSubTab = 'ideas'" class="flex-1 py-1.5 rounded-xl text-[11px] font-bold transition-all" 
                     :class="travelSubTab === 'ideas' ? 'bg-white text-theme-text shadow-sm' : 'text-gray-400 hover:text-gray-500'"><i class="fas fa-balance-scale mr-1"></i> 行き先比較</button>
-            <button @click="travelSubTab = 'itinerary'" class="flex-1 py-1.5 rounded-xl text-xs font-bold transition-all" 
+            <button @click="travelSubTab = 'itinerary'" class="flex-1 py-1.5 rounded-xl text-[11px] font-bold transition-all" 
                     :class="travelSubTab === 'itinerary' ? 'bg-white text-theme-text shadow-sm' : 'text-gray-400 hover:text-gray-500'"><i class="fas fa-calendar-alt mr-1"></i> 日程・予定</button>
           </div>
 
@@ -763,7 +741,7 @@
 
     <!-- MODALS -->
     
-    <!-- Image Viewer Modal (全画面写真ビューア) -->
+    <!-- Image Viewer Modal -->
     <transition name="fade">
       <div v-if="viewerImageIndex !== -1" class="fixed inset-0 z-50 bg-black flex flex-col max-w-md mx-auto">
         <div class="flex justify-between items-center p-4 text-white safe-pt relative z-10 bg-gradient-to-b from-black/50 to-transparent">
@@ -792,8 +770,8 @@
               <button @click="showDestinationModal = false" class="w-8 h-8 bg-gray-100 rounded-full text-gray-500 active:scale-90 transition-transform"><i class="fas fa-times"></i></button>
             </div>
             <div class="space-y-4">
-              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">行き先名</label><input v-model="editingDestination.name" type="text" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all" placeholder="例：ハワイ、モルディブ"></div>
-              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">備考・特徴・メモ</label><textarea v-model="editingDestination.memo" rows="3" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all break-words" placeholder="気になるホテル、やりたいアクティビティ、ベストシーズンなど"></textarea></div>
+              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">行き先名</label><input v-model="editingDestination.name" type="text" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-[11px] font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all" placeholder="例：ハワイ、モルディブ"></div>
+              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">備考・特徴・メモ</label><textarea v-model="editingDestination.memo" rows="3" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-[11px] font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all break-words" placeholder="気になるホテル、やりたいアクティビティ、ベストシーズンなど"></textarea></div>
               <div class="pt-2 flex gap-3">
                  <button v-if="editingDestination.id" @click="deleteDestination" class="flex-1 py-3.5 rounded-2xl border border-red-100 text-theme-accent text-sm font-bold bg-red-50 active:scale-95 transition-transform">削除</button>
                  <button @click="saveDestination" class="flex-[2] py-3.5 rounded-2xl bg-theme-text text-white text-sm font-bold shadow-float active:scale-95 transition-transform">保存する</button>
@@ -814,8 +792,8 @@
               <button @click="showDestItemModal = false" class="w-8 h-8 bg-gray-100 rounded-full text-gray-500 active:scale-90 transition-transform"><i class="fas fa-times"></i></button>
             </div>
             <div class="space-y-4">
-              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">項目名</label><input v-model="editingDestItem.name" type="text" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all" placeholder="例：航空券 (2人分)、ホテル(5泊)"></div>
-              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">金額 (¥)</label><input v-model.number="editingDestItem.cost" type="number" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all" placeholder="例：300000"></div>
+              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">項目名</label><input v-model="editingDestItem.name" type="text" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-[11px] font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all" placeholder="例：航空券 (2人分)、ホテル(5泊)"></div>
+              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">金額 (¥)</label><input v-model.number="editingDestItem.cost" type="number" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-[11px] font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all" placeholder="例：300000"></div>
               <button @click="saveDestItem" class="w-full mt-2 py-3.5 rounded-2xl bg-theme-primary text-white font-bold text-sm shadow-float active:scale-95 transition-transform">項目を保存する</button>
             </div>
           </div>
@@ -823,46 +801,89 @@
       </div>
     </transition>
 
-    <!-- Task Modal -->
+    <!-- Task Modal (インラインカレンダー＆スクロール構造修正) -->
     <transition name="bg-fade">
-      <div v-if="showTaskModal" class="fixed inset-0 z-50 flex flex-col justify-end bg-black/40 backdrop-blur-sm" @click="showTaskModal = false">
+      <div v-if="showTaskModal" class="fixed inset-0 z-50 flex flex-col justify-center items-center bg-black/40 backdrop-blur-sm p-4" @click="showTaskModal = false">
         <transition name="modal" appear>
-          <div v-if="showTaskModal" class="bg-white w-full max-w-md mx-auto rounded-t-[32px] p-6 shadow-2xl max-h-[90vh] overflow-y-auto safe-pb" @click.stop>
-            <div class="flex justify-between items-center mb-5 relative">
-              <h3 class="text-lg font-serif font-bold text-theme-text">{{ editingTask.id ? 'TODO編集' : '新規TODO' }}</h3>
-              <button @click="showTaskModal = false" class="w-8 h-8 bg-gray-100 rounded-full text-gray-500 active:scale-90 transition-transform"><i class="fas fa-times"></i></button>
+          <div v-if="showTaskModal" class="bg-white w-[92%] max-w-[340px] rounded-[32px] flex flex-col max-h-[85vh] shadow-2xl" @click.stop>
+            
+            <div class="px-5 py-3 flex justify-between items-center border-b border-gray-50 flex-shrink-0">
+              <h3 class="text-base font-serif font-bold text-theme-text">{{ editingTask.id ? 'TODO編集' : '新規TODO' }}</h3>
+              <button @click="showTaskModal = false" class="w-7 h-7 bg-gray-100 rounded-full text-gray-500 active:scale-90 transition-transform flex flex-col items-center justify-center"><i class="fas fa-times text-xs"></i></button>
             </div>
-            <div class="space-y-4">
-              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">タイトル</label><input v-model="editingTask.title" type="text" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight focus:border-transparent transition-all" placeholder="例：パスポート更新"></div>
-              <div>
-                <label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">カテゴリー</label>
-                <div class="flex flex-wrap gap-2">
-                  <button v-for="cat in settings.categories" :key="'task-cat-'+cat.id" @click="editingTask.category = cat.id" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm" :class="editingTask.category === cat.id ? 'text-white' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'" :style="editingTask.category === cat.id ? { backgroundColor: cat.color } : {}">{{ cat.label }}</button>
+            
+            <div class="px-5 py-3 space-y-3 flex-1 overflow-y-auto hide-scroll">
+              <!-- タイトル -->
+              <div class="flex items-center gap-2">
+                <label class="text-[10px] font-bold text-theme-subtext flex-shrink-0 w-10">タイトル</label>
+                <input v-model="editingTask.title" type="text" class="flex-1 box-border bg-gray-50 border border-gray-100 rounded-xl px-3 py-1.5 text-[11px] font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight focus:border-transparent transition-all m-0" placeholder="例：パスポート更新">
+              </div>
+              
+              <!-- カテゴリ・優先度・担当者 (3列グリッド) -->
+              <div class="grid grid-cols-3 gap-2">
+                <div class="flex flex-col gap-1">
+                  <label class="text-[10px] font-bold text-theme-subtext">カテゴリー</label>
+                  <select v-model="editingTask.category" class="w-full box-border bg-gray-50 border border-gray-100 rounded-lg px-2 py-1.5 text-[11px] font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all m-0">
+                    <option v-for="cat in settings.categories" :key="'task-cat-'+cat.id" :value="cat.id">{{ cat.label }}</option>
+                  </select>
                 </div>
-              </div>
-              <div class="grid grid-cols-2 gap-3">
-                <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">開始日</label><input v-model="editingTask.startDate" type="date" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-3 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all"></div>
-                <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">終了日</label><input v-model="editingTask.endDate" type="date" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-3 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all"></div>
-              </div>
-              <div class="grid grid-cols-2 gap-3">
-                <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">最終期限</label><input v-model="editingTask.dueDate" type="date" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-3 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all"></div>
-                <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">優先度</label>
-                  <select v-model="editingTask.priority" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-3 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all">
-                    <option value="highest">Highest (最優先)</option><option value="high">High (高)</option><option value="medium">Medium (中)</option><option value="low">Low (低)</option>
+                <div class="flex flex-col gap-1">
+                  <label class="text-[10px] font-bold text-theme-subtext">優先度</label>
+                  <select v-model="editingTask.priority" class="w-full box-border bg-gray-50 border border-gray-100 rounded-lg px-2 py-1.5 text-[11px] font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all m-0">
+                    <option value="highest">最優先</option><option value="high">高</option><option value="medium">中</option><option value="low">低</option>
+                  </select>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-[10px] font-bold text-theme-subtext">担当者</label>
+                  <select v-model="editingTask.assignee" class="w-full box-border bg-gray-50 border border-gray-100 rounded-lg px-2 py-1.5 text-[11px] font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all m-0">
+                    <option v-for="assignee in settings.assignees" :key="assignee" :value="assignee">{{ assignee }}</option>
                   </select>
                 </div>
               </div>
-              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">担当者</label>
-                <div class="flex flex-wrap gap-2">
-                  <button v-for="assignee in settings.assignees" :key="assignee" @click="editingTask.assignee = assignee" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm" :class="editingTask.assignee === assignee ? 'bg-theme-text text-white' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'">{{ assignee }}</button>
+              
+              <!-- 期間選択カレンダー -->
+              <div>
+                <div class="flex justify-between items-end mb-1.5">
+                  <label class="text-[10px] font-bold text-theme-subtext">期間 <span class="font-normal text-[9px] text-theme-primary ml-0.5">(タップで開始〜終了を選択)</span></label>
+                  <div class="text-[10px] font-bold text-theme-text">{{ formatShortDate(editingTask.startDate) }} <span class="text-gray-300 mx-0.5">-</span> {{ formatShortDate(editingTask.endDate) }}</div>
+                </div>
+                <div class="bg-gray-50 rounded-xl p-2 border border-gray-100">
+                  <div class="flex justify-between items-center mb-1.5 px-2">
+                    <button @click="taskCalPrevMonth" class="w-6 h-6 flex items-center justify-center text-gray-400 active:scale-90"><i class="fas fa-chevron-left text-[10px]"></i></button>
+                    <span class="text-[10px] font-bold text-theme-text">{{ taskCalYear }}年 {{ taskCalMonth }}月</span>
+                    <button @click="taskCalNextMonth" class="w-6 h-6 flex items-center justify-center text-gray-400 active:scale-90"><i class="fas fa-chevron-right text-[10px]"></i></button>
+                  </div>
+                  <div class="grid grid-cols-7 gap-y-0.5 gap-x-0 text-center">
+                    <div v-for="d in ['日','月','火','水','木','金','土']" :key="d" class="text-[8px] font-bold text-gray-400 mb-0.5" :class="d === '日' ? 'text-red-300' : (d === '土' ? 'text-blue-300' : '')">{{d}}</div>
+                    <div v-for="day in taskCalDays" :key="day.dateStr"
+                         @click="selectTaskDate(day.dateStr)"
+                         class="h-6 flex items-center justify-center text-[11px] transition-all cursor-pointer select-none"
+                         :class="getTaskCalDayClass(day)">
+                      {{ day.dateNum }}
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">参考URL</label><input v-model="editingTask.url" type="url" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all" placeholder="https://..."></div>
-              <div class="pt-2 flex gap-3">
-                 <button v-if="editingTask.id" @click="deleteTask" class="flex-1 py-3.5 rounded-2xl border border-red-100 text-theme-accent text-sm font-bold bg-red-50 active:scale-95 transition-transform">削除</button>
-                 <button @click="saveTask" class="flex-[2] py-3.5 rounded-2xl bg-theme-text text-white text-sm font-bold shadow-float active:scale-95 transition-transform">保存する</button>
+              
+              <!-- 最終期限とURL -->
+              <div class="flex gap-3 items-center">
+                <div class="flex items-center gap-1.5 flex-shrink-0">
+                  <label class="text-[10px] font-bold text-theme-subtext">期限</label>
+                  <input v-model="editingTask.dueDate" type="date" class="box-border bg-gray-50 border border-gray-100 rounded-lg px-2 py-1.5 text-[11px] font-medium w-[105px] appearance-none m-0 focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all">
+                </div>
+                <div class="flex items-center gap-1.5 flex-1 min-w-0">
+                  <label class="text-[10px] font-bold text-theme-subtext flex-shrink-0">URL</label>
+                  <input v-model="editingTask.url" type="url" class="flex-1 box-border bg-gray-50 border border-gray-100 rounded-lg px-2 py-1.5 text-[11px] font-medium min-w-0 m-0 focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all" placeholder="https://...">
+                </div>
               </div>
+              
             </div>
+            
+            <div class="p-3 border-t border-gray-50 flex gap-2.5 flex-shrink-0 bg-gray-50/50 rounded-b-[32px]">
+               <button v-if="editingTask.id" @click="deleteTask" class="flex-1 py-2.5 rounded-xl border border-red-100 text-theme-accent text-xs font-bold bg-white shadow-sm active:scale-95 transition-transform">削除</button>
+               <button @click="saveTask" class="flex-[2] py-2.5 rounded-xl bg-theme-text text-white text-xs font-bold shadow-sm active:scale-95 transition-transform">保存する</button>
+            </div>
+            
           </div>
         </transition>
       </div>
@@ -878,15 +899,15 @@
               <button @click="showTravelModal = false" class="w-8 h-8 bg-gray-100 rounded-full text-gray-500 active:scale-90 transition-transform"><i class="fas fa-times"></i></button>
             </div>
             <div v-if="!editingTravelEvent.dayId" class="space-y-4">
-               <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">日付</label><input v-model="newTravelDay.date" type="date" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all"></div>
-               <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">行き先 / テーマ</label><input v-model="newTravelDay.destination" type="text" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all" placeholder="例：ハワイ到着 ホノルル散策"></div>
+               <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">日付</label><input v-model="newTravelDay.date" type="date" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-[11px] font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all"></div>
+               <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">行き先 / テーマ</label><input v-model="newTravelDay.destination" type="text" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-[11px] font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all" placeholder="例：ハワイ到着 ホノルル散策"></div>
                <button @click="saveTravelDay" class="w-full mt-2 py-3.5 rounded-2xl bg-theme-primary text-white font-bold text-sm shadow-float active:scale-95 transition-transform">日程を追加する</button>
             </div>
             <div v-else class="space-y-4">
-               <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">時間</label><input v-model="editingTravelEvent.time" type="time" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all"></div>
-               <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">内容</label><input v-model="editingTravelEvent.title" type="text" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all" placeholder="例：ディナークルーズ"></div>
-               <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">参考URL</label><input v-model="editingTravelEvent.url" type="url" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all"></div>
-               <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">メモ</label><textarea v-model="editingTravelEvent.memo" rows="2" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all break-words"></textarea></div>
+               <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">時間</label><input v-model="editingTravelEvent.time" type="time" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-[11px] font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all"></div>
+               <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">内容</label><input v-model="editingTravelEvent.title" type="text" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-[11px] font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all" placeholder="例：ディナークルーズ"></div>
+               <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">参考URL</label><input v-model="editingTravelEvent.url" type="url" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-[11px] font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all"></div>
+               <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">メモ</label><textarea v-model="editingTravelEvent.memo" rows="2" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-[11px] font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all break-words"></textarea></div>
                <button @click="saveTravelEvent" class="w-full mt-2 py-3.5 rounded-2xl bg-theme-primary text-white font-bold text-sm shadow-float active:scale-95 transition-transform">予定を保存する</button>
             </div>
           </div>
@@ -910,13 +931,13 @@
                   <button v-for="cat in settings.categories" :key="'exp-cat-'+cat.id" @click="editingExpense.category = cat.id" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm" :class="editingExpense.category === cat.id ? 'text-white' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'" :style="editingExpense.category === cat.id ? { backgroundColor: cat.color } : {}">{{ cat.label }}</button>
                 </div>
               </div>
-              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">項目名</label><input v-model="editingExpense.name" type="text" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all"></div>
-              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">参考URL</label><input v-model="editingExpense.url" type="url" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all"></div>
+              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">項目名</label><input v-model="editingExpense.name" type="text" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-[11px] font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all"></div>
+              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">参考URL</label><input v-model="editingExpense.url" type="url" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-[11px] font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all"></div>
               <div class="grid grid-cols-2 gap-3">
-                <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">予定額 (¥)</label><input v-model.number="editingExpense.estimated" type="number" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all"></div>
-                <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">実費 (¥)</label><input v-model.number="editingExpense.actual" type="number" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all"></div>
+                <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">予定額 (¥)</label><input v-model.number="editingExpense.estimated" type="number" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-[11px] font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all"></div>
+                <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">実費 (¥)</label><input v-model.number="editingExpense.actual" type="number" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-[11px] font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all"></div>
               </div>
-              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">支払済金額 (¥)</label><input v-model.number="editingExpense.paid" type="number" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all"></div>
+              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">支払済金額 (¥)</label><input v-model.number="editingExpense.paid" type="number" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-[11px] font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all"></div>
               <div class="pt-2 flex gap-3">
                  <button v-if="editingExpense.id" @click="deleteExpense" class="flex-1 py-3.5 rounded-2xl border border-red-100 text-theme-accent text-sm font-bold bg-red-50 active:scale-95 transition-transform">削除</button>
                  <button @click="saveExpense" class="flex-[2] py-3.5 rounded-2xl bg-theme-text text-white text-sm font-bold shadow-float active:scale-95 transition-transform">保存する</button>
@@ -937,9 +958,9 @@
               <button @click="showSavingModal = false" class="w-8 h-8 bg-gray-100 rounded-full text-gray-500 active:scale-90 transition-transform"><i class="fas fa-times"></i></button>
             </div>
             <div class="space-y-4">
-              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">日付</label><input v-model="editingSaving.date" type="date" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all"></div>
-              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">金額 (¥)</label><input v-model.number="editingSaving.amount" type="number" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all" placeholder="例: 50000"></div>
-              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">メモ</label><input v-model="editingSaving.memo" type="text" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all" placeholder="例: 10月分 給料から"></div>
+              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">日付</label><input v-model="editingSaving.date" type="date" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-[11px] font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all"></div>
+              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">金額 (¥)</label><input v-model.number="editingSaving.amount" type="number" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-[11px] font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all" placeholder="例: 50000"></div>
+              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">メモ</label><input v-model="editingSaving.memo" type="text" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-[11px] font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all" placeholder="例: 10月分 給料から"></div>
               
               <div class="pt-2 flex gap-3">
                  <button v-if="editingSaving.id" @click="deleteSaving" class="flex-1 py-3.5 rounded-2xl border border-red-100 text-theme-accent text-sm font-bold bg-red-50 active:scale-95 transition-transform">削除</button>
@@ -972,7 +993,7 @@
                 </div>
                 <img v-else :src="newGalleryItem.imageUrl" class="w-full h-full object-cover">
               </div>
-              <input v-model="newGalleryItem.memo" type="text" class="w-full box-border max-w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all" placeholder="メモ（任意）">
+              <input v-model="newGalleryItem.memo" type="text" class="w-full box-border bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-[11px] font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all" placeholder="メモ（任意）">
               <button @click="saveImage" :disabled="!newGalleryItem.imageUrl" class="w-full py-3.5 rounded-2xl bg-theme-text text-white font-bold text-sm shadow-float active:scale-95 transition-transform disabled:opacity-50 mt-1">保存する</button>
             </div>
           </div>
@@ -993,36 +1014,39 @@
             <div class="space-y-4">
               <div>
                 <label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">結婚式の日程</label>
-                <input v-model="settings.weddingDate" type="date" class="w-full box-border max-w-full appearance-none bg-gray-50 border border-gray-100 rounded-2xl px-3 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all m-0">
+                <input v-model="settings.weddingDate" type="date" class="w-full box-border appearance-none bg-gray-50 border border-gray-100 rounded-2xl px-3 py-3 text-[11px] font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all m-0">
               </div>
               <div>
                 <label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">新婚旅行 出発日</label>
-                <input v-model="settings.honeymoonDate" type="date" class="w-full box-border max-w-full appearance-none bg-gray-50 border border-gray-100 rounded-2xl px-3 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all m-0">
+                <input v-model="settings.honeymoonDate" type="date" class="w-full box-border appearance-none bg-gray-50 border border-gray-100 rounded-2xl px-3 py-3 text-[11px] font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all m-0">
               </div>
 
+              <!-- 担当者の登録 -->
               <div class="border-t border-gray-100 pt-3">
                 <h4 class="text-[12px] font-bold text-theme-text mb-2"><i class="fas fa-user-friends mr-1.5 text-theme-primary"></i>担当者の登録</h4>
                 <div class="space-y-2">
                   <div v-for="(assignee, idx) in settings.assignees" :key="'assignee-'+idx" class="flex gap-2">
-                    <input v-model="settings.assignees[idx]" type="text" class="flex-1 box-border max-w-full m-0 px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl text-xs font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all" placeholder="お名前を入力">
+                    <input v-model="settings.assignees[idx]" type="text" class="flex-1 box-border m-0 px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl text-[11px] font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all" placeholder="お名前を入力">
                     <button @click="removeAssignee(idx)" class="w-8 h-8 flex items-center justify-center bg-red-50 text-red-400 rounded-xl active:scale-95 transition-all"><i class="fas fa-minus"></i></button>
                   </div>
-                  <button @click="addAssignee" class="w-full py-2 bg-gray-100 text-gray-500 rounded-xl text-xs font-bold active:scale-95 transition-all"><i class="fas fa-plus mr-1"></i>担当者を追加</button>
+                  <button @click="addAssignee" class="w-full py-2 bg-gray-100 text-gray-500 rounded-xl text-[11px] font-bold active:scale-95 transition-all"><i class="fas fa-plus mr-1"></i>担当者を追加</button>
                 </div>
               </div>
               
+              <!-- カテゴリーの登録 -->
               <div class="border-t border-gray-100 pt-3">
                 <h4 class="text-[12px] font-bold text-theme-text mb-2"><i class="fas fa-tags mr-1.5 text-theme-primary"></i>カテゴリーの登録</h4>
                 <div class="space-y-2">
                   <div v-for="(cat, idx) in settings.categories" :key="'cat-edit-'+cat.id" class="flex gap-2 items-center bg-gray-50 p-1.5 rounded-xl border border-gray-100">
                     <input type="color" v-model="cat.color" class="w-8 h-8 rounded-lg cursor-pointer flex-shrink-0 border-0 p-0 m-0">
-                    <input v-model="cat.label" type="text" class="flex-1 box-border max-w-full m-0 px-2 py-1.5 bg-white border border-gray-100 rounded-lg text-xs font-medium focus:ring-2 focus:ring-theme-primaryLight transition-all" placeholder="カテゴリー名">
+                    <input v-model="cat.label" type="text" class="flex-1 box-border m-0 px-2 py-1.5 bg-white border border-gray-100 rounded-lg text-[11px] font-medium focus:ring-2 focus:ring-theme-primaryLight transition-all" placeholder="カテゴリー名">
                     <button @click="removeCategory(idx)" class="w-8 h-8 flex items-center justify-center text-red-400 rounded-lg active:scale-90 transition-all flex-shrink-0"><i class="fas fa-trash text-xs"></i></button>
                   </div>
-                  <button @click="addCategory" class="w-full py-2 bg-gray-100 text-gray-500 rounded-xl text-xs font-bold active:scale-95 transition-all"><i class="fas fa-plus mr-1"></i>カテゴリーを追加</button>
+                  <button @click="addCategory" class="w-full py-2 bg-gray-100 text-gray-500 rounded-xl text-[11px] font-bold active:scale-95 transition-all"><i class="fas fa-plus mr-1"></i>カテゴリーを追加</button>
                 </div>
               </div>
 
+              <!-- 項目別予算設定 -->
               <div class="border-t border-gray-100 pt-3">
                 <h4 class="text-[12px] font-bold text-theme-text mb-2"><i class="fas fa-wallet mr-1.5 text-theme-primary"></i>項目別 予算設定</h4>
                 <div class="space-y-2.5">
@@ -1030,7 +1054,7 @@
                     <label class="w-[70px] text-[10px] font-bold text-theme-subtext truncate" :style="{ color: cat.color }">{{ cat.label }}</label>
                     <div class="flex-1 relative">
                       <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-[10px]">¥</span>
-                      <input v-model.number="settings.budgets[cat.id]" type="number" class="w-full box-border max-w-full m-0 pl-6 pr-8 py-2 bg-gray-50 border border-gray-100 rounded-xl text-xs font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all">
+                      <input v-model.number="settings.budgets[cat.id]" type="number" class="w-full box-border m-0 pl-6 pr-8 py-2 bg-gray-50 border border-gray-100 rounded-xl text-[11px] font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all">
                       <button @click="settings.budgets[cat.id] = 0" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500 w-5 h-5 flex items-center justify-center rounded-full active:bg-gray-200 transition-colors"><i class="fas fa-times-circle text-xs"></i></button>
                     </div>
                   </div>
@@ -1071,7 +1095,7 @@
               <div class="bg-gray-50 p-3.5 rounded-2xl border border-gray-100">
                 <p class="text-[11px] font-bold text-theme-text mb-2"><i class="fas fa-download mr-1.5 text-gray-500"></i>2. 相手のデータを受け取る</p>
                 <p class="text-[10px] text-theme-subtext mb-2 leading-relaxed">パートナーから送られてきた同期コードを貼り付けて「データを反映」を押してください。（※上書きされます）</p>
-                <textarea v-model="shareCodeInput" rows="2" class="w-full box-border max-w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-[10px] focus:ring-2 focus:ring-theme-primaryLight transition-all mb-2" placeholder="ここにコードを貼り付け"></textarea>
+                <textarea v-model="shareCodeInput" rows="2" class="w-full box-border bg-white border border-gray-200 rounded-xl px-3 py-2 text-[10px] focus:ring-2 focus:ring-theme-primaryLight transition-all mb-2" placeholder="ここにコードを貼り付け"></textarea>
                 <button @click="importShareCode" :disabled="!shareCodeInput" class="w-full py-2.5 rounded-xl bg-theme-text text-white font-bold text-[11px] shadow-sm active:scale-95 transition-transform disabled:opacity-50 disabled:active:scale-100">
                   データを反映する
                 </button>
@@ -1280,6 +1304,73 @@
         const emptyTask = { id: null, title: '', category: 'wedding', priority: 'medium', assignee: 'ふたり', startDate: todayStr(), endDate: todayStr(), dueDate: todayStr(), completed: false, url: '', isSwiping: false, swipeOffset: 0 };
         const editingTask = ref({...emptyTask});
 
+        // モーダル内カレンダー用 (インライン選択)
+        const taskCalDate = ref(new Date());
+        const taskDateSelectionStep = ref(0);
+        const taskCalYear = computed(() => taskCalDate.value.getFullYear());
+        const taskCalMonth = computed(() => taskCalDate.value.getMonth() + 1);
+
+        const taskCalDays = computed(() => {
+          const year = taskCalDate.value.getFullYear();
+          const month = taskCalDate.value.getMonth();
+          const lastDay = new Date(year, month + 1, 0).getDate();
+          const days = [];
+          const firstDayOfWeek = new Date(year, month, 1).getDay();
+          const prevMonthLastDay = new Date(year, month, 0).getDate();
+          
+          for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+            const d = new Date(year, month - 1, prevMonthLastDay - i);
+            const dStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+            days.push({ dateNum: d.getDate(), isCurrentMonth: false, dateStr: dStr });
+          }
+          for (let i = 1; i <= lastDay; i++) {
+            const d = new Date(year, month, i);
+            const dStr = `${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+            days.push({ dateNum: i, isCurrentMonth: true, dateStr: dStr });
+          }
+          const endPadding = 42 - days.length;
+          for (let i = 1; i <= endPadding; i++) {
+            const d = new Date(year, month + 1, i);
+            const dStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+            days.push({ dateNum: d.getDate(), isCurrentMonth: false, dateStr: dStr });
+          }
+          return days;
+        });
+
+        const taskCalPrevMonth = () => { taskCalDate.value = new Date(taskCalDate.value.getFullYear(), taskCalDate.value.getMonth() - 1, 1); };
+        const taskCalNextMonth = () => { taskCalDate.value = new Date(taskCalDate.value.getFullYear(), taskCalDate.value.getMonth() + 1, 1); };
+
+        const selectTaskDate = (dateStr) => {
+          if (taskDateSelectionStep.value === 0) {
+            editingTask.value.startDate = dateStr;
+            editingTask.value.endDate = dateStr;
+            taskDateSelectionStep.value = 1;
+          } else {
+            if (dateStr >= editingTask.value.startDate) {
+              editingTask.value.endDate = dateStr;
+            } else {
+              editingTask.value.endDate = editingTask.value.startDate;
+              editingTask.value.startDate = dateStr;
+            }
+            taskDateSelectionStep.value = 0;
+          }
+        };
+
+        const getTaskCalDayClass = (day) => {
+          if (!day.isCurrentMonth) return 'text-gray-300 pointer-events-none opacity-50';
+          const d = day.dateStr;
+          const start = editingTask.value.startDate;
+          const end = editingTask.value.endDate;
+          
+          if (start && end) {
+            if (d === start && d === end) return 'bg-theme-primary text-white font-bold shadow-sm';
+            if (d === start) return 'bg-theme-primary text-white font-bold rounded-r-none';
+            if (d === end) return 'bg-theme-primary text-white font-bold rounded-l-none';
+            if (d > start && d < end) return 'bg-theme-primaryLight/40 text-theme-text rounded-none';
+          }
+          return 'text-theme-text hover:bg-gray-100';
+        };
+
         const expandedTaskCategories = ref(settings.value.categories.map(c => c.id));
         const toggleTaskCategory = (id) => {
           if (expandedTaskCategories.value.includes(id)) {
@@ -1296,7 +1387,6 @@
           { value: 'low', label: 'Low', iconClass: 'fas fa-angle-down text-blue-300' }
         ];
 
-        // 期限が早い順にソート
         const todoTasks = computed(() => tasks.value.filter(t => !t.completed).sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate)));
         const doneTasks = computed(() => tasks.value.filter(t => t.completed).sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate)));
 
@@ -1307,10 +1397,14 @@
 
         const openTaskModal = (t=null) => {
           editingTask.value = t ? {...t} : {...emptyTask, id: Date.now(), category: settings.value.categories[0]?.id || 'wedding', assignee: settings.value.assignees[0] || '', startDate: todayStr(), endDate: todayStr(), dueDate: todayStr()};
+          taskCalDate.value = new Date(editingTask.value.startDate);
+          taskDateSelectionStep.value = 0;
           showTaskModal.value = true;
         };
         const openTaskModalWithPriority = (priority) => {
           editingTask.value = { ...emptyTask, id: Date.now(), priority: priority, category: settings.value.categories[0]?.id || 'wedding', assignee: settings.value.assignees[0] || '', startDate: todayStr(), endDate: todayStr(), dueDate: todayStr() };
+          taskCalDate.value = new Date(editingTask.value.startDate);
+          taskDateSelectionStep.value = 0;
           showTaskModal.value = true;
         };
 
@@ -1482,6 +1576,7 @@
           taskProgress, todayTasks, urgentTasks, totalActual,
           taskStatusTab, priorityBlocks, todoTasks, doneTasks, getTasksByPriority, getTasksByCategory,
           expandedTaskCategories, toggleTaskCategory,
+          taskCalYear, taskCalMonth, taskCalDays, taskCalPrevMonth, taskCalNextMonth, selectTaskDate, getTaskCalDayClass,
           handleTouchStart, handleTouchMove, handleTouchEnd, safeClick,
           showTaskModal, editingTask, openTaskModal, openTaskModalWithPriority, saveTask, deleteTask, deleteSpecificTask, editTask, toggleTask, isOverdue, clearDoneTasks,
           currentDate, matrixDays, prevMonth, nextMonth, currentMonthLabel, todayStr,
