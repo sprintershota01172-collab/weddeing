@@ -107,8 +107,8 @@
       </div>
     </header>
 
-    <!-- MAIN AREA -->
-    <main class="flex-1 flex flex-col overflow-hidden px-4 pt-3 pb-[100px] relative">
+    <!-- MAIN AREA (pb-[160px]に変更し、下部の余白を拡張) -->
+    <main class="flex-1 flex flex-col overflow-hidden px-4 pt-3 pb-[160px] relative">
       <transition name="fade" mode="out-in">
         
         <!-- HOME TAB -->
@@ -194,10 +194,9 @@
           </div>
 
           <transition name="fade" mode="out-in">
-            <!-- 1. TODO リスト表示 (田の字グリッド＆超コンパクト化) -->
+            <!-- 1. TODO リスト表示 -->
             <div v-if="taskStatusTab === 'todo'" class="flex-1 grid grid-cols-2 gap-2 overflow-hidden pb-1">
               <div v-for="block in priorityBlocks" :key="block.value" class="bg-white rounded-[16px] p-2 shadow-soft border border-white flex flex-col overflow-hidden">
-                
                 <div class="flex justify-between items-center mb-1.5 pb-1 border-b border-gray-50 flex-shrink-0">
                   <h3 class="font-bold text-[10px] flex items-center text-theme-text leading-none">
                     <i :class="block.iconClass" class="mr-1 w-3 text-center"></i>{{ block.label }}
@@ -216,15 +215,12 @@
                          @touchstart="handleTouchStart($event, task)" @touchmove="handleTouchMove($event, task)" @touchend="handleTouchEnd($event, task, () => deleteSpecificTask(task.id))"
                          @click="safeClick(() => editTask(task))">
                       
-                      <!-- 左端カラーバー -->
                       <div class="absolute left-0 top-0 bottom-0 w-1" :style="{ backgroundColor: getCategoryDef(task.category).color }"></div>
 
-                      <!-- チェックボックス -->
                       <button @click.stop="toggleTask(task)" class="flex-shrink-0 w-[14px] h-[14px] rounded-[3px] border border-gray-300 flex items-center justify-center transition-all bg-white ml-0.5 group">
                         <i class="fas fa-check text-[6px] opacity-0 text-theme-primary group-hover:opacity-50"></i>
                       </button>
                       
-                      <!-- テキスト・期限 -->
                       <div class="flex-1 flex justify-between items-center min-w-0 pr-0.5">
                         <span class="font-bold text-[9px] text-theme-text truncate leading-none pt-[1px]">{{ task.title }}</span>
                         <span class="text-[8px] font-bold leading-none flex-shrink-0 ml-1 pt-[1px]" :class="isOverdue(task) ? 'text-theme-accent animate-pulse' : 'text-gray-400'">
@@ -234,7 +230,6 @@
                     </div>
                   </div>
                   
-                  <!-- タスク追加枠 -->
                   <div @click="openTaskModalWithPriority(block.value)" class="flex items-center justify-center h-[24px] rounded-md border border-dashed border-gray-200 text-gray-400 hover:text-theme-primary hover:bg-theme-primaryLight/10 active:bg-gray-50 transition-all cursor-pointer mt-0.5 group">
                     <span class="text-[9px] font-bold group-hover:text-theme-primary"><i class="fas fa-plus mr-1"></i>追加</span>
                   </div>
@@ -242,7 +237,7 @@
               </div>
             </div>
 
-            <!-- 2. 日程表 (ガントチャート風) -->
+            <!-- 2. 日程表 (ガントチャート) -->
             <div v-else-if="taskStatusTab === 'calendar'" class="flex-1 flex flex-col overflow-hidden pb-1">
               <div class="flex justify-between items-center mb-2 px-2 flex-shrink-0">
                 <div class="flex items-center gap-3">
@@ -258,7 +253,6 @@
                   <table class="w-full text-left border-separate border-spacing-0 whitespace-nowrap min-w-max">
                     <thead class="sticky top-0 z-30 shadow-[0_1px_2px_rgba(0,0,0,0.05)] bg-white">
                       <tr>
-                        <!-- 進行中のTODO文字を削除し、ヘッダー背景のみ残す -->
                         <th class="sticky left-0 z-40 min-w-[130px] max-w-[130px] p-1 border-r border-b border-gray-100 bg-white shadow-[2px_0_4px_rgba(0,0,0,0.02)]"></th>
                         <th v-for="day in matrixDays" :key="'th-'+day.dateStr" class="p-1 min-w-[24px] text-center border-l border-b border-gray-100 bg-white" :class="{'bg-theme-primaryLight/20': day.isToday}">
                           <div class="text-[7px] text-theme-subtext" :class="day.dayOfWeek === '日' ? 'text-red-400' : (day.dayOfWeek === '土' ? 'text-blue-400' : '')">{{ day.dayOfWeek }}</div>
@@ -268,7 +262,6 @@
                     </thead>
                     <tbody>
                       <template v-for="cat in settings.categories" :key="'cat-'+cat.id">
-                        <!-- カテゴリアコーディオンヘッダー -->
                         <tr @click="toggleTaskCategory(cat.id)" class="cursor-pointer group">
                           <td class="sticky left-0 z-20 min-w-[130px] max-w-[130px] px-2 py-1 border-r border-b border-gray-100 font-bold text-[9px] text-theme-text bg-gray-50 shadow-[2px_0_4px_rgba(0,0,0,0.02)] group-hover:bg-gray-100 transition-colors">
                             <div class="flex justify-between items-center">
@@ -279,14 +272,12 @@
                           <td :colspan="matrixDays.length" class="border-b border-gray-100 bg-gray-50/50 group-hover:bg-gray-100/50 transition-colors"></td>
                         </tr>
                         
-                        <!-- カテゴリごとのタスク -->
                         <template v-if="expandedTaskCategories.includes(cat.id)">
                           <tr v-if="getTasksByCategory(cat.id).length === 0">
                              <td class="sticky left-0 z-10 px-2 py-1 border-r border-b border-gray-50 bg-white text-gray-300 text-[8px] shadow-[2px_0_4px_rgba(0,0,0,0.02)] text-center h-[20px]">タスクなし</td>
                              <td :colspan="matrixDays.length" class="border-b border-gray-50 h-[20px]"></td>
                           </tr>
                           <tr v-for="task in getTasksByCategory(cat.id)" :key="'task-'+task.id" class="group/task hover:bg-gray-50/80 transition-colors h-[22px]">
-                            <!-- 左固定のタスク名 (高さ半減 & 期限を右側に) -->
                             <td class="sticky left-0 z-10 min-w-[130px] max-w-[130px] px-1.5 py-0 border-r border-b border-gray-100 cursor-pointer shadow-[2px_0_4px_rgba(0,0,0,0.02)] bg-white group-hover/task:bg-gray-50/80 transition-colors" @click="editTask(task)">
                               <div class="flex justify-between items-center w-full h-full">
                                 <div class="text-[9px] font-bold text-theme-text truncate flex-1 pr-1">{{ task.title }}</div>
@@ -296,9 +287,7 @@
                                 </div>
                               </div>
                             </td>
-                            <!-- ガントチャートのバー描画エリア -->
                             <td v-for="day in matrixDays" :key="'td-'+task.id+'-'+day.dateStr" class="p-0 border-r border-b border-gray-50 relative" :class="{'bg-theme-primaryLight/10': day.isToday}">
-                              <!-- 色塗りブロック (期間) -->
                               <div v-if="day.dateStr >= task.startDate && day.dateStr <= task.endDate"
                                    class="absolute top-1/2 -translate-y-1/2 h-[12px] z-0"
                                    :class="{
@@ -309,7 +298,6 @@
                                    }"
                                    :style="{ backgroundColor: getCategoryDef(task.category).color, opacity: 0.7 }">
                               </div>
-                              <!-- 期限マーカー (赤い旗) -->
                               <div v-if="day.dateStr === task.dueDate" class="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
                                 <i class="fas fa-flag text-[8px] text-theme-accent drop-shadow-sm"></i>
                               </div>
@@ -743,12 +731,12 @@
       </transition>
     </main>
 
-    <!-- Floating Action Button -->
+    <!-- Floating Action Button (かぶらないように高く設定) -->
     <transition name="fade">
       <button v-if="['tasks', 'gallery', 'travel'].includes(activeTab)" 
               @click="activeTab === 'tasks' ? openTaskModal() : (activeTab === 'gallery' ? openGalleryModal() : (travelSubTab === 'ideas' ? openDestinationModal() : openTravelModal(null)))" 
-              class="absolute bottom-[90px] right-4 w-12 h-12 bg-theme-text text-white rounded-full shadow-float flex items-center justify-center hover:bg-black active:scale-90 transition-all z-30">
-        <i :class="activeTab === 'tasks' ? 'fas fa-plus' : (activeTab === 'gallery' ? 'fas fa-camera' : (travelSubTab === 'ideas' ? 'fas fa-map-marker-alt' : 'fas fa-calendar-plus'))" class="text-lg"></i>
+              class="absolute bottom-[140px] right-5 w-14 h-14 bg-theme-text text-white rounded-full shadow-float flex items-center justify-center hover:bg-black active:scale-90 transition-all z-50">
+        <i :class="activeTab === 'tasks' ? 'fas fa-plus' : (activeTab === 'gallery' ? 'fas fa-camera' : (travelSubTab === 'ideas' ? 'fas fa-map-marker-alt' : 'fas fa-calendar-plus'))" class="text-xl"></i>
       </button>
     </transition>
 
@@ -764,7 +752,7 @@
 
     <!-- MODALS -->
     
-    <!-- Image Viewer Modal (全画面写真ビューア) -->
+    <!-- Image Viewer Modal -->
     <transition name="fade">
       <div v-if="viewerImageIndex !== -1" class="fixed inset-0 z-50 bg-black flex flex-col max-w-md mx-auto">
         <div class="flex justify-between items-center p-4 text-white safe-pt relative z-10 bg-gradient-to-b from-black/50 to-transparent">
@@ -824,7 +812,7 @@
       </div>
     </transition>
 
-    <!-- Task Modal (インラインカレンダー＆完全スクロールフリー化) -->
+    <!-- Task Modal -->
     <transition name="bg-fade">
       <div v-if="showTaskModal" class="fixed inset-0 z-50 flex flex-col justify-center items-center bg-black/40 backdrop-blur-sm p-3" @click="showTaskModal = false">
         <transition name="modal" appear>
@@ -835,15 +823,12 @@
               <button @click="showTaskModal = false" class="w-7 h-7 bg-gray-100 rounded-full text-gray-500 active:scale-90 transition-transform flex flex-col items-center justify-center"><i class="fas fa-times text-xs"></i></button>
             </div>
             
-            <!-- スクロールなしで全項目が見えるようにパディングとマージンを極限まで削減 -->
             <div class="px-4 py-2.5 space-y-2.5 flex-1">
-              <!-- タイトル -->
               <div class="flex items-center gap-2">
                 <label class="text-[10px] font-bold text-theme-subtext flex-shrink-0 w-8">件名</label>
                 <input v-model="editingTask.title" type="text" class="flex-1 box-border bg-gray-50 border border-gray-100 rounded-xl px-3 py-1.5 text-[11px] font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight focus:border-transparent transition-all m-0" placeholder="例：パスポート更新">
               </div>
               
-              <!-- カテゴリ・優先度・担当者 (3列横並びセレクト) -->
               <div class="grid grid-cols-3 gap-2">
                 <div class="flex items-center bg-gray-50 border border-gray-100 rounded-lg overflow-hidden">
                   <span class="text-[8px] font-bold text-theme-subtext px-1.5 bg-gray-100 border-r border-gray-200">項目</span>
@@ -865,7 +850,6 @@
                 </div>
               </div>
               
-              <!-- 期間選択カレンダー (高さを圧縮) -->
               <div>
                 <div class="flex justify-between items-end mb-1">
                   <label class="text-[10px] font-bold text-theme-subtext">期間 <span class="font-normal text-[8px] text-theme-primary ml-0.5">(タップで開始〜終了を選択)</span></label>
@@ -889,7 +873,6 @@
                 </div>
               </div>
               
-              <!-- 最終期限とURL -->
               <div class="flex gap-2 items-center">
                 <div class="flex items-center gap-1.5 flex-shrink-0">
                   <label class="text-[9px] font-bold text-theme-subtext">期限</label>
@@ -1045,7 +1028,6 @@
                 <input v-model="settings.honeymoonDate" type="date" class="w-full box-border appearance-none bg-gray-50 border border-gray-100 rounded-2xl px-3 py-3 text-[11px] font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all m-0">
               </div>
 
-              <!-- 担当者の登録 -->
               <div class="border-t border-gray-100 pt-3">
                 <h4 class="text-[12px] font-bold text-theme-text mb-2"><i class="fas fa-user-friends mr-1.5 text-theme-primary"></i>担当者の登録</h4>
                 <div class="space-y-2">
@@ -1057,7 +1039,6 @@
                 </div>
               </div>
               
-              <!-- カテゴリーの登録 -->
               <div class="border-t border-gray-100 pt-3">
                 <h4 class="text-[12px] font-bold text-theme-text mb-2"><i class="fas fa-tags mr-1.5 text-theme-primary"></i>カテゴリーの登録</h4>
                 <div class="space-y-2">
@@ -1070,7 +1051,6 @@
                 </div>
               </div>
 
-              <!-- 項目別予算設定 -->
               <div class="border-t border-gray-100 pt-3">
                 <h4 class="text-[12px] font-bold text-theme-text mb-2"><i class="fas fa-wallet mr-1.5 text-theme-primary"></i>項目別 予算設定</h4>
                 <div class="space-y-2.5">
