@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Wedding & Journey</title>
+  
+  <!-- iOS向け ホーム画面追加・フルスクリーン設定 -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="W & J">
+  
+  <link id="apple-touch-icon" rel="apple-touch-icon" href="">
+  <link id="favicon" rel="icon" type="image/png" href="">
+
+  <!-- 高品位アプリアイコン即時生成スクリプト (iOS Safari用PNG) -->
+  <script>
+    (function() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 192;
+      canvas.height = 192;
+      const ctx = canvas.getContext('2d');
+
+      // 背景：上品なエクリュ・シャンパンアイボリーのグラデーション
+      const grad = ctx.createLinearGradient(0, 0, 192, 192);
+      grad.addColorStop(0, '#FFFFFF');
+      grad.addColorStop(0.5, '#FAF8F5');
+      grad.addColorStop(1, '#F2ECE1');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 192, 192);
+
+      // 外枠の細いゴールドライン
+      ctx.strokeStyle = '#D8C7A8';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(12, 12, 168, 168);
+
+      // 内側の細いフレームライン
+      ctx.strokeStyle = '#A68A61';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(16, 16, 160, 160);
+
+      // 象徴的な重なり合うダブルリング（ゴールド×ピンクゴールド）
+      // 左リング (ゴールド)
+      ctx.beginPath();
+      ctx.arc(87, 70, 19, 0, Math.PI * 2);
+      ctx.strokeStyle = '#A68A61';
+      ctx.lineWidth = 3.5;
+      ctx.stroke();
+
+      // 右リング (ダスティピンク)
+      ctx.beginPath();
+      ctx.arc(105, 70, 19, 0, Math.PI * 2);
+      ctx.strokeStyle = '#D98C93';
+      ctx.lineWidth = 3.5;
+      ctx.stroke();
+
+      // ダイヤモンドの輝きアクセント
+      ctx.fillStyle = '#A68A61';
+      ctx.beginPath();
+      ctx.arc(87, 49, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 中央のエレガントな「W & J」タイポグラフィ
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = 'bold 36px "Cormorant Garamond", Georgia, serif';
+      ctx.fillStyle = '#2C2C2C';
+      ctx.fillText('W & J', 96, 118);
+
+      // サブタイトル
+      ctx.font = '600 8.5px "Noto Sans JP", sans-serif';
+      ctx.fillStyle = '#8A724E';
+      ctx.fillText('WEDDING & JOURNEY', 96, 142);
+
+      const iconUrl = canvas.toDataURL('image/png');
+      document.getElementById('apple-touch-icon').href = iconUrl;
+      document.getElementById('favicon').href = iconUrl;
+    })();
+  </script>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            theme: {
+              bg: '#Faf9f7',
+              surface: '#ffffff',
+              primary: '#A68A61', 
+              primaryLight: '#E8DFD1',
+              text: '#2C2C2C',
+              subtext: '#9CA3AF',
+              accent: '#D98C93',
+              accentLight: '#F3D8DA',
+            }
+          },
+          fontFamily: {
+            sans: ['"Noto Sans JP"', 'sans-serif'],
+            serif: ['"Cormorant Garamond"', 'serif']
+          },
+          boxShadow: {
+            'soft': '0 10px 40px -10px rgba(0,0,0,0.05)',
+            'float': '0 20px 40px -10px rgba(0,0,0,0.1)',
+            'inner-light': 'inset 0 2px 4px 0 rgba(255, 255, 255, 0.3)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body, html { background-color: #Faf9f7; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; overflow: hidden; height: 100dvh; width: 100vw; }
+    .app-container { height: 100dvh; max-height: 100dvh; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+    
+    .hide-scroll { scroll-behavior: smooth; }
+    .hide-scroll::-webkit-scrollbar { display: none; }
+    
+    .fade-enter-active, .fade-leave-active { transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+    .fade-enter-from, .fade-leave-to { opacity: 0; transform: translateY(10px); }
+    .fade-leave-to { transform: translateY(-10px); }
+    
+    .modal-enter-active, .modal-leave-active { transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    .modal-enter-from, .modal-leave-to { opacity: 0; transform: translateY(100%); }
+    
+    .bg-fade-enter-active, .bg-fade-leave-active { transition: opacity 0.3s ease; }
+    .bg-fade-enter-from, .bg-fade-leave-to { opacity: 0; }
+
+    .list-enter-active, .list-leave-active { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .list-enter-from, .list-leave-to { opacity: 0; transform: scale(0.95); }
+    
+    .accordion-enter-active, .accordion-leave-active { transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; }
+    .accordion-enter-from, .accordion-leave-to { max-height: 0; opacity: 0; }
+    .accordion-enter-to, .accordion-leave-from { max-height: 1200px; opacity: 1; }
+    
+    .glass { background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+    .glass-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.5); }
+    
+    .safe-pb { padding-bottom: env(safe-area-inset-bottom, 16px); }
+    .safe-pt { padding-top: env(safe-area-inset-top, 0px); }
+    
+    input, textarea, select { font-size: 16px !important; outline: none; }
+    .break-words { word-wrap: break-word; overflow-wrap: break-word; }
+  </style>
+</head>
+<body class="text-theme-text font-sans antialiased selection:bg-theme-primaryLight">
+
+  <div id="app" class="max-w-md mx-auto app-container shadow-2xl">
+    
+    <!-- HEADER -->
+    <header class="glass z-40 px-5 py-3 flex justify-between items-center flex-shrink-0 safe-pt shadow-sm">
+      <h1 class="font-serif text-xl font-semibold tracking-widest text-theme-primary drop-shadow-sm">W & J</h1>
+      <div class="flex gap-2">
+        <button @click="showShareModal = true" class="w-9 h-9 flex items-center justify-center rounded-full bg-white shadow-soft text-theme-primary hover:text-theme-text active:scale-90 transition-all border border-gray-50">
+          <i class="fas fa-user-friends text-[13px]"></i>
+        </button>
+        <button @click="showSettingsModal = true" class="w-9 h-9 flex items-center justify-center rounded-full bg-white shadow-soft text-theme-subtext hover:text-theme-primary active:scale-90 transition-all">
+          <i class="fas fa-sliders-h text-[13px]"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN AREA -->
+    <main class="flex-1 flex flex-col overflow-hidden px-4 pt-3 pb-[100px] relative">
+      <transition name="fade" mode="out-in">
+        
+        <!-- HOME TAB -->
+        <div v-if="activeTab === 'home'" class="w-full h-full flex flex-col gap-3 overflow-hidden">
+          
+          <div class="bg-gradient-to-br from-white to-gray-50 rounded-[28px] p-4 shadow-soft border border-white text-center flex-1 flex flex-col justify-center items-center relative overflow-hidden group min-h-[130px]">
+            <div class="absolute -right-4 -top-4 text-theme-accent opacity-5 transform group-hover:scale-110 transition-transform duration-700"><i class="fas fa-heart text-8xl"></i></div>
+            <p class="text-[10px] text-theme-subtext tracking-widest font-medium mb-1">Wedding Countdown ♡</p>
+            <div class="font-serif text-5xl text-theme-text flex items-baseline tracking-tight">
+              {{ daysUntilWedding >= 0 ? daysUntilWedding : 0 }}<span class="text-sm font-sans text-theme-subtext ml-1.5 font-light">Days</span>
+            </div>
+            <p class="text-[10px] text-theme-subtext bg-white/60 px-3 py-0.5 rounded-full mt-1.5">{{ formatDate(settings.weddingDate) }}</p>
+          </div>
+
+          <div class="flex gap-3 flex-[0.8] min-h-[100px]">
+            <div class="flex-1 bg-gradient-to-br from-theme-primary to-[#8A724E] text-white rounded-[24px] p-4 shadow-float relative overflow-hidden flex flex-col justify-center">
+              <div class="absolute -left-2 -bottom-2 opacity-10"><i class="fas fa-plane-departure text-6xl"></i></div>
+              <p class="text-[9px] tracking-widest font-medium mb-1 z-10 opacity-80">HONEYMOON</p>
+              <div class="font-serif text-3xl z-10">
+                {{ daysUntilHoneymoon >= 0 ? daysUntilHoneymoon : 0 }}<span class="text-[10px] font-sans ml-1 opacity-70">Days</span>
+              </div>
+            </div>
+            <div class="flex-1 bg-white rounded-[24px] p-4 shadow-soft border border-white flex flex-col justify-center">
+              <p class="text-[9px] text-theme-subtext tracking-widest font-medium mb-2">PROGRESS</p>
+              <div class="space-y-3">
+                <div>
+                  <div class="flex justify-between text-[10px] mb-1"><span class="text-theme-accent"><i class="fas fa-ring mr-1"></i>式</span><span class="font-bold">{{ weddingProgress }}%</span></div>
+                  <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden"><div class="bg-theme-accent h-full rounded-full transition-all duration-1000 ease-out" :style="`width: ${weddingProgress}%`"></div></div>
+                </div>
+                <div>
+                  <div class="flex justify-between text-[10px] mb-1"><span class="text-theme-primary"><i class="fas fa-plane mr-1"></i>旅</span><span class="font-bold">{{ travelProgress }}%</span></div>
+                  <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden"><div class="bg-theme-primary h-full rounded-full transition-all duration-1000 ease-out" :style="`width: ${travelProgress}%`"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-[28px] p-5 shadow-soft border border-white flex flex-col flex-[1.4] relative overflow-hidden min-h-[180px]">
+            <p class="text-[10px] text-theme-subtext tracking-widest font-medium mb-2.5">BUDGET & TASKS</p>
+            <div class="flex gap-4 items-center flex-1">
+              <div class="w-20 h-20 relative flex-shrink-0">
+                <canvas id="homeBudgetChart"></canvas>
+                <div class="absolute inset-0 flex items-center justify-center flex-col">
+                  <span class="text-[8px] text-theme-subtext">使用率</span>
+                  <span class="text-[11px] font-bold">{{ settings.totalBudget > 0 ? Math.round((totalActual / settings.totalBudget) * 100) : 0 }}%</span>
+                </div>
+              </div>
+              <div class="flex-1 flex flex-col justify-center space-y-2 text-xs">
+                <div class="flex justify-between border-b border-gray-50 pb-1">
+                  <span class="text-theme-subtext">総予算</span><span class="font-medium tracking-wide">¥{{ formatNum(settings.totalBudget) }}</span>
+                </div>
+                <div class="flex justify-between border-b border-gray-50 pb-1">
+                  <span class="text-theme-subtext">現支出</span><span class="font-medium text-theme-accent tracking-wide">¥{{ formatNum(totalActual) }}</span>
+                </div>
+                <div class="flex justify-between pt-0.5">
+                  <span class="text-theme-primary font-bold">残額</span><span class="font-bold tracking-wide">¥{{ formatNum(settings.totalBudget - totalActual) }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3 mt-3 pt-3 border-t border-gray-50">
+              <div class="bg-gray-50/50 rounded-xl py-2 flex flex-col items-center justify-center">
+                <span class="text-2xl font-serif text-theme-text leading-none">{{ todayTasks.length }}</span>
+                <span class="text-[9px] text-theme-subtext mt-1 font-medium">今日のTODO</span>
+              </div>
+              <div class="bg-theme-accentLight/30 rounded-xl py-2 flex flex-col items-center justify-center">
+                <span class="text-2xl font-serif text-theme-accent leading-none">{{ urgentTasks.length }}</span>
+                <span class="text-[9px] text-theme-accent mt-1 font-medium">期限間近</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TASKS TAB -->
+        <div v-else-if="activeTab === 'tasks'" class="w-full h-full flex flex-col overflow-hidden gap-2">
+          
+          <div class="flex p-1 bg-gray-100/80 rounded-2xl flex-shrink-0 shadow-inner">
+            <button @click="taskStatusTab = 'todo'" class="flex-1 py-2 rounded-xl text-xs font-bold transition-all" 
+                    :class="taskStatusTab === 'todo' ? 'bg-white text-theme-text shadow-sm' : 'text-gray-400 hover:text-gray-500'">進行中</button>
+            <button @click="taskStatusTab = 'done'" class="flex-1 py-2 rounded-xl text-xs font-bold transition-all" 
+                    :class="taskStatusTab === 'done' ? 'bg-white text-theme-text shadow-sm' : 'text-gray-400 hover:text-gray-500'">完了済</button>
+          </div>
+
+          <transition name="fade" mode="out-in">
+            <div v-if="taskStatusTab === 'todo'" class="flex-1 grid grid-cols-2 gap-3 overflow-hidden pb-1">
+              
+              <div v-for="block in priorityBlocks" :key="block.value" class="bg-white rounded-[24px] p-3 shadow-soft border border-white flex flex-col overflow-hidden">
+                <div class="flex justify-between items-center mb-2 pb-1 border-b border-gray-50 flex-shrink-0">
+                  <h3 class="font-bold text-[11px] flex items-center text-theme-text leading-none">
+                    <i :class="block.iconClass" class="mr-1.5 w-3 text-center"></i>{{ block.label }}
+                  </h3>
+                  <span class="text-[9px] font-bold text-theme-subtext bg-gray-50 px-1.5 py-0.5 rounded-full">{{ getTasksByPriority(block.value).length }}</span>
+                </div>
+                
+                <div class="flex-1 overflow-y-auto hide-scroll space-y-1.5 pr-1 -mx-1 px-1">
+                  <div v-if="getTasksByPriority(block.value).length === 0" class="text-center py-6 text-gray-300 text-[10px] font-medium">タスクなし</div>
+                  
+                  <div v-for="task in getTasksByPriority(block.value)" :key="task.id" class="relative overflow-hidden rounded-xl bg-red-50/50 mb-1.5">
+                    <div class="absolute inset-y-0 right-0 w-[50px] flex items-center justify-center text-theme-accent font-bold text-sm"><i class="fas fa-trash"></i></div>
+                    <div class="flex gap-2 items-start p-2 rounded-xl bg-gray-50/80 border border-gray-100 hover:bg-white active:bg-gray-50 transition-colors cursor-pointer group w-full relative z-10"
+                         :class="{'transition-transform duration-200': !task.isSwiping}"
+                         @touchstart="handleTouchStart($event, task)"
+                         @touchmove="handleTouchMove($event, task)"
+                         @touchend="handleTouchEnd($event, task, () => deleteSpecificTask(task.id))"
+                         :style="{ transform: `translateX(${task.swipeOffset || 0}px)` }"
+                         @click="safeClick(() => editTask(task))">
+                      
+                      <button @click.stop="toggleTask(task)" class="mt-0.5 flex-shrink-0 w-[18px] h-[18px] rounded-full border-[1.5px] border-gray-300 group-hover:border-theme-primary flex items-center justify-center transition-all bg-white">
+                        <i class="fas fa-check text-[7px] opacity-0 text-theme-primary group-hover:opacity-50"></i>
+                      </button>
+                      
+                      <div class="flex-1 min-w-0">
+                        <h4 class="font-bold text-[10px] text-theme-text leading-tight mb-0.5 truncate">{{ task.title }}</h4>
+                        <div class="flex items-center gap-1.5 text-[8px]">
+                          <span class="font-medium text-theme-subtext truncate">{{ formatDate(task.dueDate) }}</span>
+                          <span v-if="task.assignee !== 'Both'" class="bg-gray-100 text-gray-500 px-1 rounded-sm">{{ task.assignee }}</span>
+                          <span v-if="isOverdue(task)" class="text-theme-accent font-bold animate-pulse">!期限切れ</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div v-else class="flex-1 overflow-y-auto hide-scroll pb-2 flex flex-col">
+              <div class="flex justify-between items-end mb-2 px-1 flex-shrink-0">
+                <span class="text-[10px] font-bold text-theme-subtext">完了したタスク ({{ doneTasks.length }})</span>
+                <button v-if="doneTasks.length > 0" @click="clearDoneTasks" class="text-[9px] font-bold text-theme-accent bg-red-50 px-2.5 py-1 rounded-full shadow-sm active:scale-95 transition-transform"><i class="fas fa-trash-alt mr-1"></i>一括削除</button>
+              </div>
+
+              <div class="flex-1 space-y-2.5">
+                <div v-if="doneTasks.length === 0" class="text-center py-16 text-gray-300 flex-shrink-0">
+                  <i class="far fa-smile text-5xl mb-3 opacity-50"></i>
+                  <p class="text-xs font-medium">完了済みのTODOはありません</p>
+                </div>
+
+                <div v-for="task in doneTasks" :key="task.id" class="relative overflow-hidden rounded-[16px] bg-theme-accentLight/40 shadow-sm flex-shrink-0">
+                  <div class="absolute inset-y-0 right-0 w-[70px] flex items-center justify-center text-theme-accent font-bold text-lg">
+                    <i class="fas fa-trash"></i>
+                  </div>
+                  
+                  <div class="bg-white p-3 rounded-[16px] border border-white flex gap-2.5 items-start opacity-70 hover:opacity-100 w-full relative z-10 cursor-pointer"
+                       :class="{'transition-transform duration-200': !task.isSwiping}"
+                       @touchstart="handleTouchStart($event, task)"
+                       @touchmove="handleTouchMove($event, task)"
+                       @touchend="handleTouchEnd($event, task, () => deleteSpecificTask(task.id))"
+                       :style="{ transform: `translateX(${task.swipeOffset || 0}px)` }"
+                       @click="safeClick(() => editTask(task))">
+                       
+                    <button @click.stop="toggleTask(task)" class="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full border-2 bg-theme-primary border-theme-primary text-white flex items-center justify-center transition-all active:scale-75">
+                      <i class="fas fa-check text-[9px]"></i>
+                    </button>
+                    <div class="flex-1 min-w-0">
+                      <h3 class="font-bold text-xs text-theme-text leading-snug mb-1 line-through decoration-gray-400">{{ task.title }}</h3>
+                      <div class="flex items-center gap-2 text-[9px] text-theme-subtext">
+                        <span class="font-medium"><i class="far fa-calendar-alt mr-1"></i>{{ formatDate(task.dueDate) }}</span>
+                        <span class="px-1.5 py-0.5 bg-gray-50 rounded">{{ task.category === 'wedding' ? 'Wedding' : 'Honeymoon' }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <p v-if="todoTasks.length > 0 || doneTasks.length > 0" class="text-center text-[9px] text-gray-400 mt-3 pb-2 flex-shrink-0">👈 項目を左にスワイプして削除</p>
+              </div>
+            </div>
+          </transition>
+        </div>
+
+        <!-- TRAVEL TAB (Integrated & Enhanced Comparison) -->
+        <div v-else-if="activeTab === 'travel'" class="w-full h-full flex flex-col overflow-hidden gap-2">
+          
+          <!-- メインタブ切り替え -->
+          <div class="flex p-1 bg-gray-100/80 rounded-2xl flex-shrink-0 shadow-inner mb-1">
+            <button @click="travelSubTab = 'ideas'" class="flex-1 py-2 rounded-xl text-xs font-bold transition-all" 
+                    :class="travelSubTab === 'ideas' ? 'bg-white text-theme-text shadow-sm' : 'text-gray-400 hover:text-gray-500'"><i class="fas fa-balance-scale mr-1"></i> 行き先比較</button>
+            <button @click="travelSubTab = 'itinerary'" class="flex-1 py-2 rounded-xl text-xs font-bold transition-all" 
+                    :class="travelSubTab === 'itinerary' ? 'bg-white text-theme-text shadow-sm' : 'text-gray-400 hover:text-gray-500'"><i class="fas fa-calendar-alt mr-1"></i> 日程・予定</button>
+          </div>
+
+          <transition name="fade" mode="out-in">
+            <!-- IDEAS (行き先比較エリア) -->
+            <div v-if="travelSubTab === 'ideas'" class="flex-1 overflow-y-auto hide-scroll pb-2 flex flex-col space-y-3">
+              
+              <div v-if="destinations.length === 0" class="text-center py-16 text-gray-300 flex-shrink-0 bg-white rounded-[24px] border border-white shadow-soft">
+                <i class="fas fa-map-marked-alt text-5xl mb-3 opacity-50 text-gray-300"></i>
+                <p class="text-xs font-medium">行き先候補が登録されていません</p>
+                <button @click="openDestinationModal()" class="mt-4 px-4 py-2 bg-theme-primary text-white text-xs font-bold rounded-full shadow-sm active:scale-95 transition-all">
+                  <i class="fas fa-plus mr-1"></i>最初の候補を追加する
+                </button>
+              </div>
+
+              <template v-else>
+                <!-- 1. 金額比較バーグラフ (Visual Cost Comparison) -->
+                <div class="bg-white p-4 rounded-[24px] shadow-soft border border-white flex-shrink-0">
+                  <div class="flex justify-between items-center mb-3">
+                    <span class="text-[10px] font-bold tracking-widest text-theme-subtext uppercase">Cost Overview</span>
+                    <span class="text-[9px] font-medium text-theme-primary bg-theme-primaryLight/40 px-2 py-0.5 rounded-full">安い順に自動ソート</span>
+                  </div>
+
+                  <div class="space-y-3">
+                    <div v-for="(dest, index) in sortedDestinations" :key="'bar-'+dest.id" class="space-y-1">
+                      <div class="flex justify-between items-center text-xs">
+                        <div class="flex items-center gap-1.5 truncate max-w-[65%]">
+                          <span class="w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center font-serif"
+                                :class="index === 0 ? 'bg-theme-primary text-white' : 'bg-gray-100 text-gray-500'">{{ index + 1 }}</span>
+                          <span class="font-bold text-theme-text truncate text-[12px]">{{ dest.name }}</span>
+                          <span v-if="index === 0" class="text-[8px] font-bold text-theme-accent bg-red-50 px-1.5 py-0.2 rounded tracking-tight">BEST</span>
+                        </div>
+                        <div class="text-right flex items-baseline gap-1">
+                          <span class="font-bold text-[13px] text-theme-text tracking-wide">¥{{ formatNum(getDestTotalCost(dest)) }}</span>
+                          <span v-if="index > 0" class="text-[9px] text-theme-accent font-medium">(+¥{{ formatNum(getDestDiffFromMin(dest)) }})</span>
+                        </div>
+                      </div>
+                      
+                      <!-- プログレスバー -->
+                      <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden flex">
+                        <div class="h-full rounded-full transition-all duration-700 ease-out"
+                             :class="index === 0 ? 'bg-gradient-to-r from-theme-primary to-[#C2A379]' : 'bg-gray-300'"
+                             :style="{ width: getDestBarPercent(dest) + '%' }"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 2. 表示形式トグル（表 / カード） -->
+                <div class="flex justify-between items-center px-1 flex-shrink-0">
+                  <span class="text-[10px] font-bold tracking-widest text-theme-subtext">DESTINATION DETAILS</span>
+                  <div class="flex bg-gray-100 p-0.5 rounded-xl border border-gray-200/50">
+                    <button @click="destViewMode = 'table'" class="px-3 py-1 rounded-lg text-[10px] font-bold transition-all"
+                            :class="destViewMode === 'table' ? 'bg-white text-theme-text shadow-sm' : 'text-gray-400'">
+                      <i class="fas fa-table mr-1"></i>比較表
+                    </button>
+                    <button @click="destViewMode = 'cards'" class="px-3 py-1 rounded-lg text-[10px] font-bold transition-all"
+                            :class="destViewMode === 'cards' ? 'bg-white text-theme-text shadow-sm' : 'text-gray-400'">
+                      <i class="fas fa-th-list mr-1"></i>カード
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 3-A. 比較マトリクス表 (Matrix Table View) -->
+                <div v-if="destViewMode === 'table'" class="bg-white rounded-[24px] shadow-soft border border-white overflow-hidden flex-shrink-0">
+                  <div class="overflow-x-auto hide-scroll p-3">
+                    <table class="w-full text-left border-collapse min-w-[340px]">
+                      <thead>
+                        <tr class="border-b border-gray-100 text-[10px] text-theme-subtext font-bold uppercase">
+                          <th class="py-2 px-2.5 font-bold w-[90px] bg-white sticky left-0 z-10 shadow-sm">比較項目</th>
+                          <th v-for="(dest, i) in sortedDestinations" :key="'th-'+dest.id" class="py-2 px-3 text-center min-w-[130px]">
+                            <span class="text-[9px] px-1.5 py-0.5 rounded mr-1" :class="i===0 ? 'bg-theme-primary text-white':'bg-gray-100 text-gray-500'">No.{{ i+1 }}</span>
+                            <span class="font-bold text-theme-text text-[11px] block mt-0.5 truncate">{{ dest.name }}</span>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody class="text-xs divide-y divide-gray-50">
+                        <tr>
+                          <td class="py-3 px-2.5 font-bold text-[10px] text-theme-subtext bg-white sticky left-0 z-10 shadow-sm">合計金額</td>
+                          <td v-for="(dest, i) in sortedDestinations" :key="'td-cost-'+dest.id" class="py-3 px-3 text-center">
+                            <span class="font-bold text-[13px] block" :class="i===0 ? 'text-theme-primary' : 'text-theme-text'">¥{{ formatNum(getDestTotalCost(dest)) }}</span>
+                            <span v-if="i > 0" class="text-[9px] text-theme-accent font-medium block mt-0.5">+¥{{ formatNum(getDestDiffFromMin(dest)) }}</span>
+                            <span v-else class="text-[8px] font-bold text-theme-primary bg-theme-primaryLight/40 px-1.5 py-0.5 rounded-full inline-block mt-0.5">最安</span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="py-2.5 px-2.5 font-bold text-[10px] text-theme-subtext bg-white sticky left-0 z-10 shadow-sm">内訳項目数</td>
+                          <td v-for="dest in sortedDestinations" :key="'td-count-'+dest.id" class="py-2.5 px-3 text-center text-[11px] text-gray-600 font-medium">
+                            {{ dest.items.length }} 件
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="py-2.5 px-2.5 font-bold text-[10px] text-theme-subtext bg-white sticky left-0 z-10 shadow-sm align-top">費用内訳</td>
+                          <td v-for="dest in sortedDestinations" :key="'td-items-'+dest.id" class="py-2.5 px-3 align-top">
+                            <div v-if="dest.items.length === 0" class="text-[10px] text-gray-300 text-center">-</div>
+                            <div v-else class="space-y-1">
+                              <div v-for="it in dest.items" :key="it.id" class="text-[10px] bg-gray-50 p-1.5 rounded-lg flex justify-between gap-1">
+                                <span class="truncate text-gray-600">{{ it.name }}</span>
+                                <span class="font-bold text-gray-800 flex-shrink-0">¥{{ formatNum(it.cost) }}</span>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="py-2.5 px-2.5 font-bold text-[10px] text-theme-subtext bg-white sticky left-0 z-10 shadow-sm align-top">特徴・メモ</td>
+                          <td v-for="dest in sortedDestinations" :key="'td-memo-'+dest.id" class="py-2.5 px-3 text-[10px] text-gray-600 leading-relaxed align-top">
+                            <div class="bg-theme-bg/60 p-2 rounded-xl max-h-28 overflow-y-auto whitespace-pre-wrap">
+                              {{ dest.memo || 'メモなし' }}
+                            </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="py-2.5 px-2.5 font-bold text-[10px] text-theme-subtext bg-white sticky left-0 z-10 shadow-sm">操作</td>
+                          <td v-for="dest in sortedDestinations" :key="'td-act-'+dest.id" class="py-2.5 px-3 text-center space-x-1.5">
+                            <button @click="openDestItemModal(dest.id)" class="px-2 py-1 bg-theme-primary text-white text-[9px] font-bold rounded-lg shadow-sm active:scale-95 transition-transform"><i class="fas fa-plus mr-0.5"></i>費用</button>
+                            <button @click="openDestinationModal(dest)" class="px-2 py-1 bg-gray-100 text-gray-600 text-[9px] font-bold rounded-lg active:scale-95 transition-transform"><i class="fas fa-edit"></i></button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <!-- 3-B. 詳細カードビュー (Card List View) -->
+                <div v-else class="space-y-3">
+                  <transition-group name="list" tag="div" class="space-y-3">
+                    <div v-for="(dest, index) in sortedDestinations" :key="dest.id" class="relative overflow-hidden rounded-[24px] bg-red-50 shadow-soft border border-red-50 flex-shrink-0">
+                      <div class="absolute inset-y-0 right-0 w-[70px] flex items-center justify-center text-theme-accent font-bold text-lg"><i class="fas fa-trash"></i></div>
+                      
+                      <div class="bg-white rounded-[24px] border border-white w-full flex flex-col relative z-10"
+                           :class="{'transition-transform duration-200': !dest.isSwiping}"
+                           @touchstart="handleTouchStart($event, dest)"
+                           @touchmove="handleTouchMove($event, dest)"
+                           @touchend="handleTouchEnd($event, dest, () => deleteDest(dest.id))"
+                           :style="{ transform: `translateX(${dest.swipeOffset || 0}px)` }">
+                           
+                        <div class="px-4 py-3.5 flex justify-between items-center bg-white cursor-pointer active:bg-gray-50 transition-colors rounded-[24px]" @click="safeClick(() => toggleDest(dest.id))">
+                          <div class="flex items-center gap-3">
+                            <span class="font-serif font-bold text-[10px] px-2 py-0.5 rounded-lg shadow-sm text-white"
+                                  :class="index === 0 ? 'bg-theme-primary' : 'bg-gray-400'">No.{{ index + 1 }}</span>
+                            <div>
+                              <div class="flex items-center gap-2">
+                                <h3 class="font-bold text-theme-text text-[14px] leading-none">{{ dest.name }}</h3>
+                                <span v-if="index === 0" class="text-[8px] font-bold text-theme-accent bg-red-50 px-1.5 py-0.5 rounded">最安候補</span>
+                              </div>
+                              <span class="text-[9px] text-theme-subtext font-medium mt-1 block">{{ dest.items.length }} 項目</span>
+                            </div>
+                          </div>
+                          <div class="text-right flex items-center gap-2">
+                            <div>
+                              <span class="font-bold text-theme-text text-[14px] tracking-wide block">¥{{ formatNum(getDestTotalCost(dest)) }}</span>
+                              <span v-if="index > 0" class="text-[9px] text-theme-accent font-medium block">+¥{{ formatNum(getDestDiffFromMin(dest)) }}</span>
+                            </div>
+                            <div class="w-6 h-6 rounded-full bg-gray-50 flex items-center justify-center text-theme-subtext transition-transform duration-300 shadow-sm" :class="{'rotate-180 bg-theme-primary text-white': expandedDests.includes(dest.id)}">
+                              <i class="fas fa-chevron-down text-[9px]"></i>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <transition name="accordion">
+                          <div v-show="expandedDests.includes(dest.id)" class="px-4 pb-4 pt-1 border-t border-gray-50/50 bg-gray-50/30 rounded-b-[24px]">
+                            <div class="mb-3 text-[11px] text-theme-text bg-white p-3 rounded-xl border border-gray-100/50 relative group">
+                              <div class="flex justify-between items-center mb-1.5 border-b border-gray-50 pb-1.5">
+                                <span class="font-bold text-theme-subtext text-[9px] tracking-wider"><i class="fas fa-sticky-note mr-1 opacity-70"></i>MEMO</span>
+                                <button @click.stop="openDestinationModal(dest)" class="text-[9px] text-theme-primary font-bold active:scale-95 transition-transform"><i class="fas fa-edit mr-1"></i>編集</button>
+                              </div>
+                              <p class="whitespace-pre-wrap leading-relaxed text-[11px]">{{ dest.memo || 'メモはありません' }}</p>
+                            </div>
+                            
+                            <div class="space-y-2 mb-3">
+                              <div v-if="dest.items.length === 0" class="text-center text-[10px] text-gray-400 py-2 font-medium">費用項目がありません</div>
+                              
+                              <div v-for="item in dest.items" :key="item.id" class="relative overflow-hidden rounded-xl bg-red-50/50">
+                                <div class="absolute inset-y-0 right-0 w-[50px] flex items-center justify-center text-theme-accent font-bold text-sm"><i class="fas fa-trash"></i></div>
+                                <div class="bg-white p-2.5 rounded-xl shadow-sm border border-gray-50 flex justify-between items-center relative z-10"
+                                     :class="{'transition-transform duration-200': !item.isSwiping}"
+                                     @touchstart.stop="handleTouchStart($event, item)"
+                                     @touchmove.stop="handleTouchMove($event, item)"
+                                     @touchend.stop="handleTouchEnd($event, item, () => deleteDestItem(dest.id, item.id))"
+                                     :style="{ transform: `translateX(${item.swipeOffset || 0}px)` }">
+                                  <span class="text-[11px] font-medium text-theme-text">{{ item.name }}</span>
+                                  <span class="text-[11px] font-bold tracking-wide">¥{{ formatNum(item.cost) }}</span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <button @click.stop="openDestItemModal(dest.id)" class="w-full py-2.5 border-2 border-dashed border-theme-primaryLight text-theme-primary rounded-xl font-bold text-[11px] flex items-center justify-center hover:bg-theme-primaryLight/20 active:scale-[0.98] transition-all mt-1 bg-white">
+                              <i class="fas fa-plus mr-1"></i> 費用項目を追加
+                            </button>
+                          </div>
+                        </transition>
+                      </div>
+                    </div>
+                  </transition-group>
+                </div>
+                
+                <p class="text-center text-[9px] text-gray-400 mt-2 pb-2 flex-shrink-0">👈 候補や費用項目は左スワイプで削除可能</p>
+              </template>
+            </div>
+
+            <!-- ITINERARY (旅行日程エリア) -->
+            <div v-else class="flex-1 overflow-y-auto hide-scroll pb-2 flex flex-col">
+              <div v-if="travels.length === 0" class="text-center py-16 text-gray-300 flex-shrink-0 bg-white rounded-[24px] border border-white shadow-soft">
+                <i class="fas fa-suitcase-rolling text-5xl mb-3 opacity-50"></i>
+                <p class="text-xs font-medium">日程が登録されていません</p>
+                <button @click="openTravelModal(null)" class="mt-4 px-4 py-2 bg-theme-primary text-white text-xs font-bold rounded-full shadow-sm active:scale-95 transition-all">
+                  <i class="fas fa-calendar-plus mr-1"></i>日程を登録する
+                </button>
+              </div>
+              
+              <transition-group name="list" tag="div" class="space-y-3">
+                <div v-for="(day, index) in sortedTravels" :key="day.id" class="relative overflow-hidden rounded-[24px] bg-red-50 shadow-soft border border-red-50 flex-shrink-0">
+                   <div class="absolute inset-y-0 right-0 w-[70px] flex items-center justify-center text-theme-accent font-bold text-lg"><i class="fas fa-trash"></i></div>
+                   
+                   <div class="bg-white rounded-[24px] border border-white w-full flex flex-col relative z-10"
+                        :class="{'transition-transform duration-200': !day.isSwiping}"
+                        @touchstart="handleTouchStart($event, day)"
+                        @touchmove="handleTouchMove($event, day)"
+                        @touchend="handleTouchEnd($event, day, () => deleteTravelDay(day.id))"
+                        :style="{ transform: `translateX(${day.swipeOffset || 0}px)` }">
+                        
+                     <div @click="safeClick(() => toggleDay(day.id))" class="w-full px-4 py-3.5 flex justify-between items-center bg-white cursor-pointer active:bg-gray-50 transition-colors rounded-[24px]">
+                       <div class="flex items-center gap-3">
+                         <span class="bg-gradient-to-br from-theme-primary to-[#8A724E] text-white font-serif font-bold text-[11px] px-2.5 py-1 rounded-xl shadow-sm">Day {{ index + 1 }}</span>
+                         <div class="text-left">
+                           <span class="block font-bold text-theme-text text-[13px] leading-none mb-1">{{ formatDate(day.date) }}</span>
+                           <span v-if="day.destination" class="block text-[10px] text-theme-subtext truncate max-w-[150px] font-medium">{{ day.destination }}</span>
+                         </div>
+                       </div>
+                       <div class="w-7 h-7 rounded-full bg-gray-50 flex items-center justify-center text-theme-subtext transition-transform duration-300 shadow-sm" :class="{'rotate-180 bg-theme-primary text-white': expandedDays.includes(day.id)}">
+                         <i class="fas fa-chevron-down text-[10px]"></i>
+                       </div>
+                     </div>
+                     
+                     <transition name="accordion">
+                       <div v-show="expandedDays.includes(day.id)" class="px-4 pb-4 pt-1 border-t border-gray-50/50 bg-gray-50/30 rounded-b-[24px]">
+                         <div class="flex justify-end mb-4 mt-1">
+                           <button @click.stop="openTravelModal(day)" class="text-[10px] font-bold bg-white text-theme-primary px-3 py-1.5 rounded-full shadow-sm border border-gray-100 active:scale-95 transition-transform">
+                             <i class="fas fa-plus mr-1"></i>予定追加
+                           </button>
+                         </div>
+                         <div class="relative border-l-2 border-theme-primaryLight ml-2 space-y-4">
+                           <div v-for="event in day.events.sort((a,b) => a.time.localeCompare(b.time))" :key="event.id" class="relative pl-5">
+                             <div class="absolute -left-[6px] top-1.5 w-2.5 h-2.5 rounded-full bg-theme-primary shadow-sm border-2 border-white"></div>
+                             
+                             <div class="relative overflow-hidden rounded-2xl bg-red-50/50">
+                               <div class="absolute inset-y-0 right-0 w-[50px] flex items-center justify-center text-theme-accent font-bold text-sm"><i class="fas fa-trash"></i></div>
+                               <div class="bg-white p-3 rounded-2xl shadow-sm border border-gray-50 break-words relative group z-10"
+                                    :class="{'transition-transform duration-200': !event.isSwiping}"
+                                    @touchstart.stop="handleTouchStart($event, event)"
+                                    @touchmove.stop="handleTouchMove($event, event)"
+                                    @touchend.stop="handleTouchEnd($event, event, () => deleteEvent(day.id, event.id))"
+                                    :style="{ transform: `translateX(${event.swipeOffset || 0}px)` }">
+                                 <div class="flex justify-between items-start mb-1">
+                                   <span class="text-[11px] font-bold text-theme-primary font-serif bg-theme-primaryLight/30 px-1.5 py-0.5 rounded-md">{{ event.time }}</span>
+                                   <div class="flex gap-1.5">
+                                     <a v-if="event.url" :href="event.url" target="_blank" @click.stop class="w-5 h-5 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center text-[9px] active:scale-90 transition-transform"><i class="fas fa-external-link-alt"></i></a>
+                                     <button @click.stop="deleteEvent(day.id, event.id)" class="w-5 h-5 rounded-full bg-red-50 text-theme-accent flex items-center justify-center text-[9px] active:scale-90 transition-transform"><i class="fas fa-trash"></i></button>
+                                   </div>
+                                 </div>
+                                 <h4 class="font-bold text-xs text-theme-text leading-snug">{{ event.title }}</h4>
+                                 <p v-if="event.memo" class="text-[10px] text-theme-subtext mt-1.5 bg-gray-50 p-1.5 rounded-lg">{{ event.memo }}</p>
+                               </div>
+                             </div>
+                           </div>
+                           <div v-if="day.events.length === 0" class="pl-5 text-[10px] text-gray-400 py-2 font-medium">予定がありません</div>
+                         </div>
+                       </div>
+                     </transition>
+                   </div>
+                </div>
+              </transition-group>
+              <p v-if="travels.length > 0" class="text-center text-[9px] text-gray-400 mt-3 pb-2 flex-shrink-0">👈 日程や予定を左にスワイプして削除</p>
+            </div>
+          </transition>
+        </div>
+
+        <!-- BUDGET TAB -->
+        <div v-else-if="activeTab === 'budget'" class="w-full h-full flex flex-col overflow-hidden gap-4">
+          
+          <div class="bg-white p-4 rounded-[24px] shadow-soft border border-white flex gap-4 items-center flex-shrink-0">
+            <div class="relative w-20 h-20 flex-shrink-0">
+              <canvas id="mainBudgetChart"></canvas>
+            </div>
+            <div class="flex-1 space-y-2 text-xs">
+              <div class="flex justify-between items-center border-b border-gray-50 pb-1"><span class="text-[10px] text-theme-subtext font-medium">総予算</span><span class="font-bold tracking-wide">¥{{ formatNum(settings.totalBudget) }}</span></div>
+              <div class="flex justify-between items-center border-b border-gray-50 pb-1"><span class="text-[9px] text-theme-accent font-bold px-1.5 py-0.5 bg-theme-accentLight/30 rounded">式 支出</span><span class="font-bold tracking-wide">¥{{ formatNum(weddingActual) }}</span></div>
+              <div class="flex justify-between items-center"><span class="text-[9px] text-theme-primary font-bold px-1.5 py-0.5 bg-theme-primaryLight/50 rounded">旅 支出</span><span class="font-bold tracking-wide">¥{{ formatNum(travelActual) }}</span></div>
+            </div>
+          </div>
+          
+          <div class="flex-1 flex flex-col overflow-hidden">
+            <div class="flex justify-between items-end mb-3 px-1 flex-shrink-0">
+              <h2 class="text-[10px] tracking-widest text-theme-subtext font-bold">EXPENSE LIST</h2>
+              <button @click="openExpenseModal()" class="text-[10px] font-bold text-white bg-theme-text px-3 py-1 rounded-full shadow-sm active:scale-95 transition-transform"><i class="fas fa-plus mr-1"></i>追加</button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto hide-scroll space-y-2.5 pb-2">
+              <transition-group name="list" tag="div" class="space-y-2.5">
+                <div v-for="exp in expenses" :key="exp.id" class="relative overflow-hidden rounded-[16px] bg-red-50 shadow-sm flex-shrink-0">
+                  <div class="absolute inset-y-0 right-0 w-[60px] flex items-center justify-center text-theme-accent font-bold text-base"><i class="fas fa-trash"></i></div>
+                  <div class="bg-white p-3 rounded-[16px] border border-white flex items-center justify-between active:scale-[0.98] transition-transform cursor-pointer relative z-10 w-full"
+                       :class="{'transition-transform duration-200': !exp.isSwiping}"
+                       @touchstart="handleTouchStart($event, exp)"
+                       @touchmove="handleTouchMove($event, exp)"
+                       @touchend="handleTouchEnd($event, exp, () => deleteSpecificExpense(exp.id))"
+                       :style="{ transform: `translateX(${exp.swipeOffset || 0}px)` }"
+                       @click="safeClick(() => editExpense(exp))">
+                    <div class="flex items-center gap-2.5 min-w-0 pointer-events-none">
+                      <div :class="['w-9 h-9 rounded-full flex items-center justify-center text-xs flex-shrink-0 shadow-inner', exp.category === 'wedding' ? 'bg-red-50 text-theme-accent' : 'bg-orange-50 text-theme-primary']">
+                        <i :class="exp.category === 'wedding' ? 'fas fa-ring' : 'fas fa-plane'"></i>
+                      </div>
+                      <div class="min-w-0">
+                        <h4 class="font-bold text-[12px] text-theme-text truncate">{{ exp.name }}</h4>
+                        <div class="flex items-center gap-1.5 mt-0.5">
+                          <span class="text-[9px] text-theme-subtext font-medium">予定: ¥{{ formatNum(exp.estimated) }}</span>
+                          <a v-if="exp.url" :href="exp.url" target="_blank" @click.stop class="pointer-events-auto text-theme-primary bg-theme-primaryLight/30 w-4 h-4 flex items-center justify-center rounded-full active:scale-90"><i class="fas fa-link text-[7px]"></i></a>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="text-right flex-shrink-0 ml-2 pointer-events-none">
+                      <div class="font-bold text-[13px] text-theme-text tracking-wide">¥{{ formatNum(exp.actual) }}</div>
+                      <div class="text-[8px] font-bold mt-0.5 px-1.5 py-0.5 rounded inline-block" :class="exp.paid >= exp.actual && exp.actual > 0 ? 'bg-green-50 text-green-600' : 'bg-theme-accentLight/30 text-theme-accent'">
+                        {{ exp.paid >= exp.actual && exp.actual > 0 ? '支払済' : `残 ¥${formatNum(Math.max(0, exp.actual - exp.paid))}` }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </transition-group>
+              <p v-if="expenses.length > 0" class="text-center text-[9px] text-gray-400 mt-3 pb-2 flex-shrink-0">👈 項目を左にスワイプして削除</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SAVING TAB -->
+        <div v-else-if="activeTab === 'saving'" class="w-full h-full flex flex-col overflow-hidden gap-4">
+          
+          <div class="bg-white p-4 rounded-[24px] shadow-soft border border-white flex gap-4 items-center flex-shrink-0">
+            <div class="relative w-20 h-20 flex-shrink-0">
+              <canvas id="savingChart"></canvas>
+              <div class="absolute inset-0 flex flex-col items-center justify-center">
+                <span class="text-[8px] text-theme-subtext font-medium">達成率</span>
+                <span class="text-lg font-serif font-bold text-theme-primary">
+                  {{ totalRequired > 0 ? Math.round((totalSaved / totalRequired) * 100) : 0 }}%
+                </span>
+              </div>
+            </div>
+
+            <div class="flex-1 space-y-2 text-xs bg-gray-50/50 p-2.5 rounded-xl border border-gray-100/50">
+              <div class="flex justify-between items-center border-b border-gray-100 pb-1">
+                <span class="text-[9px] text-theme-subtext font-bold"><i class="fas fa-flag mr-1 opacity-70"></i>必要額</span>
+                <span class="font-bold tracking-wide">¥{{ formatNum(totalRequired) }}</span>
+              </div>
+              <div class="flex justify-between items-center border-b border-gray-100 pb-1">
+                <span class="text-[9px] text-theme-primary font-bold"><i class="fas fa-piggy-bank mr-1"></i>貯金額</span>
+                <span class="font-bold text-theme-primary tracking-wide">¥{{ formatNum(totalSaved) }}</span>
+              </div>
+              <div class="flex justify-between items-center pt-0.5">
+                <span class="text-[10px] text-theme-accent font-bold"><i class="fas fa-exclamation-circle mr-1"></i>あと</span>
+                <span class="font-bold text-theme-accent tracking-wide text-sm">¥{{ formatNum(remainingNeeded) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex-1 flex flex-col overflow-hidden">
+            <div class="flex justify-between items-end mb-3 px-1 flex-shrink-0">
+              <h2 class="text-[10px] tracking-widest text-theme-subtext font-bold">SAVINGS HISTORY</h2>
+              <button @click="openSavingModal()" class="text-[10px] font-bold text-white bg-theme-primary px-3 py-1 rounded-full shadow-sm active:scale-95 transition-transform"><i class="fas fa-plus mr-1"></i>貯金する</button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto hide-scroll space-y-2.5 pb-2">
+              <div v-if="savings.length === 0" class="text-center py-10 text-gray-300 bg-white rounded-[20px] border border-white shadow-sm flex-shrink-0">
+                <i class="fas fa-piggy-bank text-4xl mb-2 opacity-50 text-gray-200"></i>
+                <p class="text-[11px] font-medium">貯金記録がありません</p>
+              </div>
+
+              <transition-group name="list" tag="div" class="space-y-2.5">
+                <div v-for="save in sortedSavings" :key="save.id" class="relative overflow-hidden rounded-[16px] bg-red-50 shadow-sm flex-shrink-0">
+                  <div class="absolute inset-y-0 right-0 w-[60px] flex items-center justify-center text-theme-accent font-bold text-base"><i class="fas fa-trash"></i></div>
+                  <div class="bg-white p-3 rounded-[16px] border border-white flex items-center justify-between active:scale-[0.98] transition-transform cursor-pointer relative z-10 w-full"
+                       :class="{'transition-transform duration-200': !save.isSwiping}"
+                       @touchstart="handleTouchStart($event, save)"
+                       @touchmove="handleTouchMove($event, save)"
+                       @touchend="handleTouchEnd($event, save, () => deleteSpecificSaving(save.id))"
+                       :style="{ transform: `translateX(${save.swipeOffset || 0}px)` }"
+                       @click="safeClick(() => editSaving(save))">
+                    <div class="flex items-center gap-2.5 pointer-events-none">
+                      <div class="w-9 h-9 rounded-full bg-theme-primaryLight/30 text-theme-primary flex items-center justify-center text-xs shadow-inner flex-shrink-0">
+                        <i class="fas fa-coins"></i>
+                      </div>
+                      <div class="min-w-0">
+                        <h4 class="font-bold text-[12px] text-theme-text truncate">{{ save.memo || '貯金' }}</h4>
+                        <span class="text-[9px] text-theme-subtext font-medium">{{ formatDate(save.date) }}</span>
+                      </div>
+                    </div>
+                    <div class="font-bold text-[13px] text-theme-text tracking-wide text-theme-primary flex-shrink-0 ml-2 pointer-events-none">
+                      +¥{{ formatNum(save.amount) }}
+                    </div>
+                  </div>
+                </div>
+              </transition-group>
+              <p v-if="savings.length > 0" class="text-center text-[9px] text-gray-400 mt-3 pb-2 flex-shrink-0">👈 項目を左にスワイプして削除</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- GALLERY TAB -->
+        <div v-else-if="activeTab === 'gallery'" class="w-full h-full flex flex-col overflow-hidden gap-2">
+          <div class="flex overflow-x-auto gap-2 flex-shrink-0 hide-scroll pb-1">
+            <button v-for="cat in galleryCategories" :key="cat.value" @click="galleryFilter = cat.value"
+              class="px-4 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all duration-300 active:scale-95 shadow-sm"
+              :class="galleryFilter === cat.value ? 'bg-theme-text text-white shadow-md' : 'bg-white text-theme-subtext hover:bg-gray-50'">
+              {{ cat.label }}
+            </button>
+          </div>
+          
+          <div class="flex-1 overflow-y-auto hide-scroll pb-2">
+            <transition-group name="list" tag="div" class="grid grid-cols-2 gap-2.5">
+              <div v-for="img in filteredGallery" :key="img.id" class="bg-white rounded-2xl p-1.5 shadow-sm border border-white relative group flex-shrink-0">
+                <div class="aspect-square rounded-xl overflow-hidden mb-1 bg-gray-50 relative">
+                  <img :src="img.imageUrl" class="w-full h-full object-cover transition-transform duration-700 hover:scale-110" alt="gallery">
+                  <div class="absolute inset-0 ring-1 ring-inset ring-black/5 rounded-xl"></div>
+                </div>
+                <p class="text-[10px] font-medium text-center text-theme-text truncate px-1 pb-0.5">{{ img.memo || ' ' }}</p>
+                <button @click="deleteImage(img.id)" class="absolute top-2.5 right-2.5 w-6 h-6 bg-white/90 backdrop-blur text-theme-accent rounded-full flex items-center justify-center shadow-md active:scale-90 transition-transform">
+                  <i class="fas fa-trash text-[9px]"></i>
+                </button>
+              </div>
+            </transition-group>
+            
+            <div v-if="filteredGallery.length === 0" class="text-center py-16 text-gray-300">
+              <i class="far fa-images text-5xl mb-3 opacity-50"></i>
+              <p class="text-xs font-medium">画像がありません</p>
+            </div>
+          </div>
+        </div>
+      </transition>
+    </main>
+
+    <!-- Floating Action Button -->
+    <transition name="fade">
+      <button v-if="['tasks', 'gallery', 'travel'].includes(activeTab)" 
+              @click="activeTab === 'tasks' ? openTaskModal() : (activeTab === 'gallery' ? openGalleryModal() : (travelSubTab === 'ideas' ? openDestinationModal() : openTravelModal(null)))" 
+              class="absolute bottom-[90px] right-4 w-12 h-12 bg-theme-text text-white rounded-full shadow-float flex items-center justify-center hover:bg-black active:scale-90 transition-all z-30">
+        <i :class="activeTab === 'tasks' ? 'fas fa-plus' : (activeTab === 'gallery' ? 'fas fa-camera' : (travelSubTab === 'ideas' ? 'fas fa-map-marker-alt' : 'fas fa-calendar-plus'))" class="text-lg"></i>
+      </button>
+    </transition>
+
+    <!-- Floating Bottom Navigation -->
+    <nav class="fixed bottom-4 left-4 right-4 z-40 safe-pb max-w-md mx-auto">
+      <div class="glass-nav rounded-[24px] shadow-float flex justify-around items-center h-[64px] px-2">
+        <button v-for="nav in navItems" :key="nav.id" @click="activeTab = nav.id"
+                class="relative flex flex-col items-center justify-center w-full h-full space-y-1 transition-all duration-300"
+                :class="activeTab === nav.id ? 'text-theme-primary' : 'text-theme-subtext hover:text-gray-500'">
+          <div class="relative flex items-center justify-center w-8 h-7 rounded-full transition-all duration-300" :class="activeTab === nav.id ? 'bg-theme-primaryLight/40' : ''">
+            <i :class="[nav.icon, 'text-base transition-transform duration-300', activeTab === nav.id ? 'scale-110' : '']"></i>
+          </div>
+          <span class="font-bold text-[8px] tracking-wider transition-opacity" :class="activeTab === nav.id ? 'opacity-100' : 'opacity-70'">{{ nav.label }}</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- MODALS -->
+    
+    <!-- Destination Modal -->
+    <transition name="bg-fade">
+      <div v-if="showDestinationModal" class="fixed inset-0 z-50 flex flex-col justify-end bg-black/40 backdrop-blur-sm" @click="showDestinationModal = false">
+        <transition name="modal" appear>
+          <div v-if="showDestinationModal" class="bg-white w-full max-w-md mx-auto rounded-t-[32px] p-6 shadow-2xl safe-pb" @click.stop>
+            <div class="flex justify-between items-center mb-5">
+              <h3 class="text-lg font-serif font-bold text-theme-text">{{ editingDestination.id ? '候補地を編集' : '新規候補地' }}</h3>
+              <button @click="showDestinationModal = false" class="w-8 h-8 bg-gray-100 rounded-full text-gray-500 active:scale-90 transition-transform"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="space-y-4">
+              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">行き先名</label><input v-model="editingDestination.name" type="text" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all" placeholder="例：ハワイ、モルディブ"></div>
+              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">備考・特徴・メモ</label><textarea v-model="editingDestination.memo" rows="3" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all break-words" placeholder="気になるホテル、やりたいアクティビティ、ベストシーズンなど"></textarea></div>
+              <div class="pt-2 flex gap-3">
+                 <button v-if="editingDestination.id" @click="deleteDestination" class="flex-1 py-3.5 rounded-2xl border border-red-100 text-theme-accent text-sm font-bold bg-red-50 active:scale-95 transition-transform">削除</button>
+                 <button @click="saveDestination" class="flex-[2] py-3.5 rounded-2xl bg-theme-text text-white text-sm font-bold shadow-float active:scale-95 transition-transform">保存する</button>
+              </div>
+            </div>
+          </div>
+        </transition>
+      </div>
+    </transition>
+
+    <!-- Destination Item Modal -->
+    <transition name="bg-fade">
+      <div v-if="showDestItemModal" class="fixed inset-0 z-50 flex flex-col justify-end bg-black/40 backdrop-blur-sm" @click="showDestItemModal = false">
+        <transition name="modal" appear>
+          <div v-if="showDestItemModal" class="bg-white w-full max-w-md mx-auto rounded-t-[32px] p-6 shadow-2xl safe-pb" @click.stop>
+            <div class="flex justify-between items-center mb-5">
+              <h3 class="text-lg font-serif font-bold text-theme-text">費用項目の追加</h3>
+              <button @click="showDestItemModal = false" class="w-8 h-8 bg-gray-100 rounded-full text-gray-500 active:scale-90 transition-transform"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="space-y-4">
+              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">項目名</label><input v-model="editingDestItem.name" type="text" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all" placeholder="例：航空券 (2人分)、ホテル(5泊)"></div>
+              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">金額 (¥)</label><input v-model.number="editingDestItem.cost" type="number" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all" placeholder="例：300000"></div>
+              <button @click="saveDestItem" class="w-full mt-2 py-3.5 rounded-2xl bg-theme-primary text-white font-bold text-sm shadow-float active:scale-95 transition-transform">項目を保存する</button>
+            </div>
+          </div>
+        </transition>
+      </div>
+    </transition>
+
+    <!-- Task Modal -->
+    <transition name="bg-fade">
+      <div v-if="showTaskModal" class="fixed inset-0 z-50 flex flex-col justify-end bg-black/40 backdrop-blur-sm" @click="showTaskModal = false">
+        <transition name="modal" appear>
+          <div v-if="showTaskModal" class="bg-white w-full max-w-md mx-auto rounded-t-[32px] p-6 shadow-2xl max-h-[90vh] overflow-y-auto safe-pb" @click.stop>
+            <div class="flex justify-between items-center mb-5 relative">
+              <h3 class="text-lg font-serif font-bold text-theme-text">{{ editingTask.id ? 'TODO編集' : '新規TODO' }}</h3>
+              <button @click="showTaskModal = false" class="w-8 h-8 bg-gray-100 rounded-full text-gray-500 active:scale-90 transition-transform"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="space-y-4">
+              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">タイトル</label><input v-model="editingTask.title" type="text" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight focus:border-transparent transition-all" placeholder="例：パスポート更新"></div>
+              <div class="grid grid-cols-2 gap-3">
+                <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">カテゴリー</label>
+                  <select v-model="editingTask.category" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-3 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all">
+                    <option value="wedding">Wedding</option>
+                    <option value="travel">Honeymoon</option>
+                  </select>
+                </div>
+                <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">期限</label><input v-model="editingTask.dueDate" type="date" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-3 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all"></div>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">優先度</label>
+                  <select v-model="editingTask.priority" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-3 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all">
+                    <option value="highest">Highest (最優先)</option>
+                    <option value="high">High (高)</option>
+                    <option value="medium">Medium (中)</option>
+                    <option value="low">Low (低)</option>
+                  </select>
+                </div>
+                <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">担当者</label>
+                  <select v-model="editingTask.assignee" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-3 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all">
+                    <option value="Both">Both (ふたり)</option>
+                    <option value="Shota">Shota (新郎)</option>
+                    <option value="Partner">Partner (新婦)</option>
+                  </select>
+                </div>
+              </div>
+              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">参考URL</label><input v-model="editingTask.url" type="url" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all" placeholder="https://..."></div>
+              <div class="pt-2 flex gap-3">
+                 <button v-if="editingTask.id" @click="deleteTask" class="flex-1 py-3.5 rounded-2xl border border-red-100 text-theme-accent text-sm font-bold bg-red-50 active:scale-95 transition-transform">削除</button>
+                 <button @click="saveTask" class="flex-[2] py-3.5 rounded-2xl bg-theme-text text-white text-sm font-bold shadow-float active:scale-95 transition-transform">保存する</button>
+              </div>
+            </div>
+          </div>
+        </transition>
+      </div>
+    </transition>
+
+    <!-- Travel Itinerary Modal -->
+    <transition name="bg-fade">
+      <div v-if="showTravelModal" class="fixed inset-0 z-50 flex flex-col justify-end bg-black/40 backdrop-blur-sm" @click="showTravelModal = false">
+        <transition name="modal" appear>
+          <div v-if="showTravelModal" class="bg-white w-full max-w-md mx-auto rounded-t-[32px] p-6 shadow-2xl max-h-[90vh] overflow-y-auto safe-pb" @click.stop>
+            <div class="flex justify-between items-center mb-5">
+              <h3 class="text-lg font-serif font-bold text-theme-text">{{ editingTravelEvent.dayId ? '予定追加' : '日程登録' }}</h3>
+              <button @click="showTravelModal = false" class="w-8 h-8 bg-gray-100 rounded-full text-gray-500 active:scale-90 transition-transform"><i class="fas fa-times"></i></button>
+            </div>
+            <div v-if="!editingTravelEvent.dayId" class="space-y-4">
+               <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">日付</label><input v-model="newTravelDay.date" type="date" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all"></div>
+               <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">行き先 / テーマ</label><input v-model="newTravelDay.destination" type="text" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all" placeholder="例：ハワイ到着 ホノルル散策"></div>
+               <button @click="saveTravelDay" class="w-full mt-2 py-3.5 rounded-2xl bg-theme-primary text-white font-bold text-sm shadow-float active:scale-95 transition-transform">日程を追加する</button>
+            </div>
+            <div v-else class="space-y-4">
+               <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">時間</label><input v-model="editingTravelEvent.time" type="time" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all"></div>
+               <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">内容</label><input v-model="editingTravelEvent.title" type="text" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all" placeholder="例：ディナークルーズ"></div>
+               <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">参考URL</label><input v-model="editingTravelEvent.url" type="url" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all"></div>
+               <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">メモ</label><textarea v-model="editingTravelEvent.memo" rows="2" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all break-words"></textarea></div>
+               <button @click="saveTravelEvent" class="w-full mt-2 py-3.5 rounded-2xl bg-theme-primary text-white font-bold text-sm shadow-float active:scale-95 transition-transform">予定を保存する</button>
+            </div>
+          </div>
+        </transition>
+      </div>
+    </transition>
+
+    <!-- Expense Modal -->
+    <transition name="bg-fade">
+      <div v-if="showExpenseModal" class="fixed inset-0 z-50 flex flex-col justify-end bg-black/40 backdrop-blur-sm" @click="showExpenseModal = false">
+        <transition name="modal" appear>
+          <div v-if="showExpenseModal" class="bg-white w-full max-w-md mx-auto rounded-t-[32px] p-6 shadow-2xl max-h-[90vh] overflow-y-auto safe-pb" @click.stop>
+            <div class="flex justify-between items-center mb-5">
+              <h3 class="text-lg font-serif font-bold text-theme-text">{{ editingExpense.id ? '支出編集' : '新規支出' }}</h3>
+              <button @click="showExpenseModal = false" class="w-8 h-8 bg-gray-100 rounded-full text-gray-500 active:scale-90 transition-transform"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="space-y-4">
+              <div class="flex gap-2 bg-gray-50 p-1.5 rounded-2xl">
+                <button @click="editingExpense.category = 'wedding'" :class="['flex-1 py-2 rounded-xl text-[12px] font-bold transition-all shadow-sm', editingExpense.category === 'wedding' ? 'bg-white text-theme-accent ring-1 ring-black/5' : 'text-gray-400']"><i class="fas fa-ring mr-1"></i>結婚式</button>
+                <button @click="editingExpense.category = 'travel'" :class="['flex-1 py-2 rounded-xl text-[12px] font-bold transition-all shadow-sm', editingExpense.category === 'travel' ? 'bg-white text-theme-primary ring-1 ring-black/5' : 'text-gray-400']"><i class="fas fa-plane mr-1"></i>旅行</button>
+              </div>
+              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">項目名</label><input v-model="editingExpense.name" type="text" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all"></div>
+              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">参考URL</label><input v-model="editingExpense.url" type="url" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all"></div>
+              <div class="grid grid-cols-2 gap-3">
+                <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">予定額 (¥)</label><input v-model.number="editingExpense.estimated" type="number" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all"></div>
+                <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">実費 (¥)</label><input v-model.number="editingExpense.actual" type="number" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all"></div>
+              </div>
+              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">支払済金額 (¥)</label><input v-model.number="editingExpense.paid" type="number" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all"></div>
+              <div class="pt-2 flex gap-3">
+                 <button v-if="editingExpense.id" @click="deleteExpense" class="flex-1 py-3.5 rounded-2xl border border-red-100 text-theme-accent text-sm font-bold bg-red-50 active:scale-95 transition-transform">削除</button>
+                 <button @click="saveExpense" class="flex-[2] py-3.5 rounded-2xl bg-theme-text text-white text-sm font-bold shadow-float active:scale-95 transition-transform">保存する</button>
+              </div>
+            </div>
+          </div>
+        </transition>
+      </div>
+    </transition>
+
+    <!-- Saving Modal -->
+    <transition name="bg-fade">
+      <div v-if="showSavingModal" class="fixed inset-0 z-50 flex flex-col justify-end bg-black/40 backdrop-blur-sm" @click="showSavingModal = false">
+        <transition name="modal" appear>
+          <div v-if="showSavingModal" class="bg-white w-full max-w-md mx-auto rounded-t-[32px] p-6 shadow-2xl max-h-[90vh] overflow-y-auto safe-pb" @click.stop>
+            <div class="flex justify-between items-center mb-5">
+              <h3 class="text-lg font-serif font-bold text-theme-text">{{ editingSaving.id ? '貯金記録を編集' : '貯金を追加' }}</h3>
+              <button @click="showSavingModal = false" class="w-8 h-8 bg-gray-100 rounded-full text-gray-500 active:scale-90 transition-transform"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="space-y-4">
+              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">日付</label><input v-model="editingSaving.date" type="date" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all"></div>
+              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">金額 (¥)</label><input v-model.number="editingSaving.amount" type="number" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all" placeholder="例: 50000"></div>
+              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">メモ</label><input v-model="editingSaving.memo" type="text" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all" placeholder="例: 10月分 給料から"></div>
+              
+              <div class="pt-2 flex gap-3">
+                 <button v-if="editingSaving.id" @click="deleteSaving" class="flex-1 py-3.5 rounded-2xl border border-red-100 text-theme-accent text-sm font-bold bg-red-50 active:scale-95 transition-transform">削除</button>
+                 <button @click="saveSaving" class="flex-[2] py-3.5 rounded-2xl bg-theme-text text-white text-sm font-bold shadow-float active:scale-95 transition-transform">保存する</button>
+              </div>
+            </div>
+          </div>
+        </transition>
+      </div>
+    </transition>
+
+    <!-- Gallery Modal -->
+    <transition name="bg-fade">
+      <div v-if="showGalleryModal" class="fixed inset-0 z-50 flex flex-col justify-end bg-black/40 backdrop-blur-sm" @click="showGalleryModal = false">
+        <transition name="modal" appear>
+          <div v-if="showGalleryModal" class="bg-white w-full max-w-md mx-auto rounded-t-[32px] p-6 shadow-2xl safe-pb" @click.stop>
+            <div class="flex justify-between items-center mb-5">
+              <h3 class="text-lg font-serif font-bold text-theme-text">画像追加</h3>
+              <button @click="showGalleryModal = false" class="w-8 h-8 bg-gray-100 rounded-full text-gray-500 active:scale-90 transition-transform"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="space-y-4">
+              <select v-model="newGalleryItem.category" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all">
+                <option v-for="cat in galleryCategories.filter(c => c.value !== 'all')" :key="cat.value" :value="cat.value">{{ cat.label }}</option>
+              </select>
+              <div class="relative w-full h-40 border-2 border-dashed border-gray-300 rounded-2xl bg-gray-50/50 flex flex-col items-center justify-center text-gray-400 overflow-hidden hover:bg-gray-50 transition-colors">
+                <input type="file" accept="image/*" @change="handleImageUpload" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                <div v-if="!newGalleryItem.imageUrl" class="text-center">
+                  <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center mx-auto mb-2 shadow-sm text-theme-primary"><i class="fas fa-image text-sm"></i></div>
+                  <p class="text-[10px] font-bold">タップして画像を選択</p>
+                </div>
+                <img v-else :src="newGalleryItem.imageUrl" class="w-full h-full object-cover">
+              </div>
+              <input v-model="newGalleryItem.memo" type="text" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all" placeholder="メモ（任意）">
+              <button @click="saveImage" :disabled="!newGalleryItem.imageUrl" class="w-full py-3.5 rounded-2xl bg-theme-text text-white font-bold text-sm shadow-float active:scale-95 transition-transform disabled:opacity-50 mt-1">保存する</button>
+            </div>
+          </div>
+        </transition>
+      </div>
+    </transition>
+
+    <!-- Settings Modal -->
+    <transition name="bg-fade">
+      <div v-if="showSettingsModal" class="fixed inset-0 z-50 flex flex-col justify-center items-center bg-black/40 backdrop-blur-sm p-4" @click="showSettingsModal = false">
+        <transition name="modal" appear>
+          <div v-if="showSettingsModal" class="bg-white w-full max-w-sm rounded-[32px] p-6 shadow-2xl" @click.stop>
+            <div class="flex justify-between items-center mb-5">
+              <h3 class="text-lg font-serif font-bold text-theme-text">設定</h3>
+              <button @click="showSettingsModal = false" class="w-8 h-8 bg-gray-100 rounded-full text-gray-500 active:scale-90 transition-transform"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="space-y-4">
+              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">結婚式の日程</label><input v-model="settings.weddingDate" type="date" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all"></div>
+              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">新婚旅行 出発日</label><input v-model="settings.honeymoonDate" type="date" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all"></div>
+              <div><label class="block text-[11px] font-bold text-theme-subtext mb-1 ml-1">全体の総予算 (¥)</label><input v-model.number="settings.totalBudget" type="number" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-theme-primaryLight transition-all"></div>
+              <button @click="showSettingsModal = false" class="w-full mt-3 py-3.5 rounded-2xl bg-theme-text text-white font-bold text-sm shadow-float active:scale-95 transition-transform">完了</button>
+            </div>
+          </div>
+        </transition>
+      </div>
+    </transition>
+
+    <!-- Share (Partner Sync) Modal -->
+    <transition name="bg-fade">
+      <div v-if="showShareModal" class="fixed inset-0 z-50 flex flex-col justify-center items-center bg-black/40 backdrop-blur-sm p-4" @click="showShareModal = false">
+        <transition name="modal" appear>
+          <div v-if="showShareModal" class="bg-white w-full max-w-sm rounded-[32px] p-6 shadow-2xl" @click.stop>
+            <div class="flex justify-between items-center mb-5">
+              <h3 class="text-lg font-serif font-bold text-theme-text">パートナーと同期</h3>
+              <button @click="showShareModal = false" class="w-8 h-8 bg-gray-100 rounded-full text-gray-500 active:scale-90 transition-transform"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="space-y-5">
+              <div class="bg-theme-primaryLight/20 p-3.5 rounded-2xl border border-theme-primaryLight/50">
+                <p class="text-[11px] font-bold text-theme-text mb-2"><i class="fas fa-paper-plane mr-1.5 text-theme-primary"></i>1. 今のデータを送る</p>
+                <p class="text-[10px] text-theme-subtext mb-2 leading-relaxed">現在の予定・予算・貯金・TODOデータをコード化してコピーします。LINE等で送信してください。</p>
+                <button @click="generateShareCode" class="w-full py-2.5 rounded-xl bg-theme-primary text-white font-bold text-[11px] shadow-sm active:scale-95 transition-transform">
+                  同期コードをコピーする
+                </button>
+              </div>
+
+              <div class="bg-gray-50 p-3.5 rounded-2xl border border-gray-100">
+                <p class="text-[11px] font-bold text-theme-text mb-2"><i class="fas fa-download mr-1.5 text-gray-500"></i>2. 相手のデータを受け取る</p>
+                <p class="text-[10px] text-theme-subtext mb-2 leading-relaxed">パートナーの同期コードを貼り付けて「データを反映」を押してください。（※上書きされます）</p>
+                <textarea v-model="shareCodeInput" rows="2" class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-[10px] focus:ring-2 focus:ring-theme-primaryLight transition-all mb-2" placeholder="ここにコードを貼り付け"></textarea>
+                <button @click="importShareCode" :disabled="!shareCodeInput" class="w-full py-2.5 rounded-xl bg-theme-text text-white font-bold text-[11px] shadow-sm active:scale-95 transition-transform disabled:opacity-50 disabled:active:scale-100">
+                  データを反映する
+                </button>
+              </div>
+            </div>
+          </div>
+        </transition>
+      </div>
+    </transition>
+
+  </div>
+
+  <script>
+    const { createApp, ref, computed, watch, onMounted, nextTick } = Vue;
+
+    const App = {
+      setup() {
+        const activeTab = ref('home');
+        const travelSubTab = ref('ideas'); // 'ideas' or 'itinerary'
+        const destViewMode = ref('table'); // 'table' or 'cards'
+        
+        const navItems = [
+          { id: 'home', label: 'HOME', icon: 'fas fa-home' },
+          { id: 'tasks', label: 'TASKS', icon: 'fas fa-check-square' },
+          { id: 'travel', label: 'TRAVEL', icon: 'fas fa-plane' },
+          { id: 'budget', label: 'BUDGET', icon: 'fas fa-yen-sign' },
+          { id: 'saving', label: 'SAVING', icon: 'fas fa-piggy-bank' },
+          { id: 'gallery', label: 'GALLERY', icon: 'fas fa-images' }
+        ];
+
+        const getStorage = (key, defaultVal) => JSON.parse(localStorage.getItem(key)) || defaultVal;
+        
+        const settings = ref(getStorage('wj_settings', { weddingDate: '2027-02-20', honeymoonDate: '2027-02-22', totalBudget: 5000000 }));
+        const tasks = ref(getStorage('wj_tasks', []));
+        const travels = ref(getStorage('wj_travels', []));
+        const expenses = ref(getStorage('wj_expenses', []));
+        const savings = ref(getStorage('wj_savings', []));
+        const gallery = ref(getStorage('wj_gallery', []));
+        const destinations = ref(getStorage('wj_destinations', []));
+
+        watch(settings, (v) => localStorage.setItem('wj_settings', JSON.stringify(v)), { deep: true });
+        watch(tasks, (v) => localStorage.setItem('wj_tasks', JSON.stringify(v)), { deep: true });
+        watch(travels, (v) => localStorage.setItem('wj_travels', JSON.stringify(v)), { deep: true });
+        watch(expenses, (v) => localStorage.setItem('wj_expenses', JSON.stringify(v)), { deep: true });
+        watch(savings, (v) => localStorage.setItem('wj_savings', JSON.stringify(v)), { deep: true });
+        watch(destinations, (v) => localStorage.setItem('wj_destinations', JSON.stringify(v)), { deep: true });
+        watch(gallery, (v) => { try { localStorage.setItem('wj_gallery', JSON.stringify(v)); } catch(e) {} }, { deep: true });
+
+        const todayStr = () => new Date().toLocaleDateString('en-CA');
+        const formatNum = (num) => Number(num || 0).toLocaleString();
+        const formatDate = (dateStr) => {
+          if(!dateStr) return '';
+          const d = new Date(dateStr);
+          return `${d.getFullYear()}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getDate().toString().padStart(2,'0')}`;
+        };
+        const getDaysUntil = (dateStr) => {
+          const t = new Date(dateStr).getTime();
+          const now = new Date(todayStr()).getTime();
+          return Math.ceil((t - now) / (1000 * 60 * 60 * 24));
+        };
+
+        // --- Swipe to Delete Handler ---
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let isSwipeAction = false;
+
+        const initSwipe = (item) => {
+          if (item.swipeOffset === undefined) { item.swipeOffset = 0; item.isSwiping = false; }
+        };
+
+        const handleTouchStart = (e, item) => {
+          initSwipe(item);
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
+          item.isSwiping = true;
+          isSwipeAction = false;
+        };
+
+        const handleTouchMove = (e, item) => {
+          if (!item.isSwiping) return;
+          const diffX = e.touches[0].clientX - touchStartX;
+          const diffY = e.touches[0].clientY - touchStartY;
+          
+          if (Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 10) {
+            item.isSwiping = false;
+            item.swipeOffset = 0;
+            return;
+          }
+          if (diffX < 0) {
+            item.swipeOffset = Math.max(diffX, -70);
+            if (Math.abs(diffX) > 10) isSwipeAction = true;
+          } else {
+            item.swipeOffset = 0;
+          }
+        };
+
+        const handleTouchEnd = (e, item, deleteFn) => {
+          if (!item.isSwiping) return;
+          item.isSwiping = false;
+          if (item.swipeOffset <= -50) {
+            deleteFn();
+          } else {
+            item.swipeOffset = 0;
+          }
+          setTimeout(() => { isSwipeAction = false; }, 50);
+        };
+
+        const safeClick = (fn) => { if (!isSwipeAction) fn(); };
+
+        // --- Home Data ---
+        const daysUntilWedding = computed(() => getDaysUntil(settings.value.weddingDate));
+        const daysUntilHoneymoon = computed(() => getDaysUntil(settings.value.honeymoonDate));
+        const calcProgress = (arr) => arr.length === 0 ? 0 : Math.round((arr.filter(t => t.completed).length / arr.length) * 100);
+        const weddingProgress = computed(() => calcProgress(tasks.value.filter(t => t.category === 'wedding')));
+        const travelProgress = computed(() => calcProgress(tasks.value.filter(t => t.category === 'travel')));
+        const todayTasks = computed(() => tasks.value.filter(t => !t.completed && t.dueDate === todayStr()));
+        const urgentTasks = computed(() => tasks.value.filter(t => !t.completed && getDaysUntil(t.dueDate) >= 0 && getDaysUntil(t.dueDate) <= 3));
+        const weddingActual = computed(() => expenses.value.filter(e => e.category === 'wedding').reduce((sum, e) => sum + Number(e.actual), 0));
+        const travelActual = computed(() => expenses.value.filter(e => e.category === 'travel').reduce((sum, e) => sum + Number(e.actual), 0));
+        const totalActual = computed(() => weddingActual.value + travelActual.value);
+
+        let homeChart = null, budgetChart = null, savingChart = null;
+        Chart.defaults.font.family = '"Noto Sans JP", sans-serif';
+        const renderCharts = async () => {
+          await nextTick();
+          if(activeTab.value === 'home') {
+            const ctx1 = document.getElementById('homeBudgetChart');
+            if(ctx1) {
+              if(homeChart) homeChart.destroy();
+              homeChart = new Chart(ctx1, { type: 'doughnut', data: { datasets: [{ data: [totalActual.value, Math.max(0, settings.value.totalBudget - totalActual.value)], backgroundColor: ['#D98C93', '#F3F4F6'], borderWidth: 0, borderRadius: 4 }] }, options: { cutout: '78%', responsive: true, maintainAspectRatio: false, plugins: { tooltip: { enabled: false } }, animation: { animateScale: true } } });
+            }
+          }
+          if(activeTab.value === 'budget') {
+            const ctx2 = document.getElementById('mainBudgetChart');
+            if(ctx2) {
+              if(budgetChart) budgetChart.destroy();
+              budgetChart = new Chart(ctx2, { type: 'doughnut', data: { datasets: [{ data: [weddingActual.value, travelActual.value, Math.max(0, settings.value.totalBudget - totalActual.value)], backgroundColor: ['#D98C93', '#A68A61', '#F3F4F6'], borderWidth: 0, borderRadius: 4 }] }, options: { cutout: '78%', responsive: true, maintainAspectRatio: false, plugins: { tooltip: { enabled: false } }, animation: { animateScale: true } } });
+            }
+          }
+          if(activeTab.value === 'saving') {
+            const ctx3 = document.getElementById('savingChart');
+            if(ctx3) {
+              if(savingChart) savingChart.destroy();
+              savingChart = new Chart(ctx3, { type: 'doughnut', data: { datasets: [{ data: [totalSaved.value, Math.max(0, totalRequired.value - totalSaved.value)], backgroundColor: ['#A68A61', '#F3F4F6'], borderWidth: 0, borderRadius: 4 }] }, options: { cutout: '78%', responsive: true, maintainAspectRatio: false, plugins: { tooltip: { enabled: false } }, animation: { animateScale: true } } });
+            }
+          }
+        };
+        watch(activeTab, renderCharts);
+        watch([expenses, settings, savings], renderCharts, { deep: true });
+
+        // --- Tasks ---
+        const taskStatusTab = ref('todo'); 
+        const showTaskModal = ref(false);
+        const emptyTask = { id: null, title: '', category: 'wedding', priority: 'medium', assignee: 'Both', dueDate: todayStr(), completed: false, url: '', isSwiping: false, swipeOffset: 0 };
+        const editingTask = ref({...emptyTask});
+
+        const priorityBlocks = [
+          { value: 'highest', label: 'Highest', iconClass: 'fas fa-angles-up text-theme-accent' },
+          { value: 'high', label: 'High', iconClass: 'fas fa-angle-up text-orange-400' },
+          { value: 'medium', label: 'Medium', iconClass: 'fas fa-minus text-theme-primary' },
+          { value: 'low', label: 'Low', iconClass: 'fas fa-angle-down text-blue-300' }
+        ];
+
+        const todoTasks = computed(() => tasks.value.filter(t => !t.completed).sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate)));
+        const doneTasks = computed(() => tasks.value.filter(t => t.completed).sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate)));
+
+        const getTasksByPriority = (priority) => todoTasks.value.filter(t => t.priority === priority);
+        const isOverdue = (t) => !t.completed && getDaysUntil(t.dueDate) < 0;
+
+        const openTaskModal = (t=null) => { editingTask.value = t ? {...t} : {...emptyTask, id: Date.now()}; showTaskModal.value = true; };
+        const saveTask = () => {
+          const idx = tasks.value.findIndex(t => t.id === editingTask.value.id);
+          if(idx >= 0) tasks.value[idx] = {...editingTask.value, isSwiping: false, swipeOffset: 0}; 
+          else tasks.value.push({...editingTask.value, isSwiping: false, swipeOffset: 0});
+          showTaskModal.value = false;
+        };
+        const deleteTask = () => { tasks.value = tasks.value.filter(t => t.id !== editingTask.value.id); showTaskModal.value = false; };
+        const deleteSpecificTask = (id) => { tasks.value = tasks.value.filter(t => t.id !== id); };
+        const editTask = (t) => { openTaskModal(t); };
+        const toggleTask = (t) => { t.completed = !t.completed; t.swipeOffset = 0; };
+        const clearDoneTasks = () => { if(confirm('完了済みのタスクを全て削除しますか？')) { tasks.value = tasks.value.filter(t => !t.completed); } };
+
+        // --- Travels (Itinerary) ---
+        const showTravelModal = ref(false);
+        const expandedDays = ref([]); 
+        const newTravelDay = ref({ id: null, date: todayStr(), destination: '', events: [] });
+        const editingTravelEvent = ref({ dayId: null, id: null, time: '10:00', title: '', url: '', memo: '' });
+
+        const sortedTravels = computed(() => travels.value.slice().sort((a,b) => new Date(a.date) - new Date(b.date)));
+        const toggleDay = (id) => { if(expandedDays.value.includes(id)) expandedDays.value = expandedDays.value.filter(d => d !== id); else expandedDays.value.push(id); };
+        const openTravelModal = (day) => {
+          if(!day) { newTravelDay.value = { id: Date.now(), date: todayStr(), destination: '', events: [] }; editingTravelEvent.value.dayId = null; }
+          else { editingTravelEvent.value = { dayId: day.id, id: Date.now(), time: '12:00', title: '', url: '', memo: '' }; }
+          showTravelModal.value = true;
+        };
+        const saveTravelDay = () => { travels.value.push({...newTravelDay.value}); expandedDays.value.push(newTravelDay.value.id); showTravelModal.value = false; };
+        const saveTravelEvent = () => { const day = travels.value.find(d => d.id === editingTravelEvent.value.dayId); if(day) day.events.push({...editingTravelEvent.value}); showTravelModal.value = false; };
+        const deleteEvent = (dId, eId) => { const day = travels.value.find(d => d.id === dId); if(day) day.events = day.events.filter(e => e.id !== eId); };
+        const deleteTravelDay = (id) => { travels.value = travels.value.filter(d => d.id !== id); };
+
+        // --- Destinations (Ideas / Comparison) ---
+        const expandedDests = ref([]);
+        const toggleDest = (id) => { if(expandedDests.value.includes(id)) expandedDests.value = expandedDests.value.filter(d => d !== id); else expandedDests.value.push(id); };
+        const getDestTotalCost = (dest) => dest.items.reduce((sum, item) => sum + Number(item.cost || 0), 0);
+        
+        const sortedDestinations = computed(() => {
+          return destinations.value.slice().sort((a,b) => getDestTotalCost(a) - getDestTotalCost(b));
+        });
+
+        const minDestCost = computed(() => {
+          if (sortedDestinations.value.length === 0) return 0;
+          return getDestTotalCost(sortedDestinations.value[0]);
+        });
+
+        const maxDestCost = computed(() => {
+          if (sortedDestinations.value.length === 0) return 1;
+          const max = Math.max(...sortedDestinations.value.map(d => getDestTotalCost(d)));
+          return max > 0 ? max : 1;
+        });
+
+        const getDestDiffFromMin = (dest) => {
+          return Math.max(0, getDestTotalCost(dest) - minDestCost.value);
+        };
+
+        const getDestBarPercent = (dest) => {
+          const cost = getDestTotalCost(dest);
+          if (cost === 0) return 5;
+          return Math.min(100, Math.max(12, Math.round((cost / maxDestCost.value) * 100)));
+        };
+
+        const showDestinationModal = ref(false);
+        const showDestItemModal = ref(false);
+        const emptyDestination = { id: null, name: '', memo: '', items: [] };
+        const editingDestination = ref({...emptyDestination});
+        const emptyDestItem = { destId: null, id: null, name: '', cost: 0 };
+        const editingDestItem = ref({...emptyDestItem});
+
+        const openDestinationModal = (dest=null) => { editingDestination.value = dest ? JSON.parse(JSON.stringify(dest)) : {...emptyDestination, id: Date.now(), items: []}; showDestinationModal.value = true; };
+        const saveDestination = () => {
+          const idx = destinations.value.findIndex(d => d.id === editingDestination.value.id);
+          if(idx >= 0) destinations.value[idx] = {...editingDestination.value};
+          else { destinations.value.push({...editingDestination.value}); expandedDests.value.push(editingDestination.value.id); }
+          showDestinationModal.value = false;
+        };
+        const deleteDestination = () => { destinations.value = destinations.value.filter(d => d.id !== editingDestination.value.id); showDestinationModal.value = false; };
+        const deleteDest = (id) => { destinations.value = destinations.value.filter(d => d.id !== id); };
+
+        const openDestItemModal = (destId) => { editingDestItem.value = {...emptyDestItem, destId, id: Date.now()}; showDestItemModal.value = true; };
+        const saveDestItem = () => { const dest = destinations.value.find(d => d.id === editingDestItem.value.destId); if(dest) { dest.items.push({...editingDestItem.value}); } showDestItemModal.value = false; };
+        const deleteDestItem = (destId, itemId) => { const dest = destinations.value.find(d => d.id === destId); if(dest) { dest.items = dest.items.filter(i => i.id !== itemId); } };
+
+        // --- Budget ---
+        const showExpenseModal = ref(false);
+        const emptyExpense = { id: null, category: 'wedding', name: '', url: '', estimated: 0, actual: 0, paid: 0 };
+        const editingExpense = ref({...emptyExpense});
+        const openExpenseModal = (exp=null) => { editingExpense.value = exp ? {...exp} : {...emptyExpense, id: Date.now()}; showExpenseModal.value = true; };
+        const saveExpense = () => { const idx = expenses.value.findIndex(e => e.id === editingExpense.value.id); if(idx >= 0) expenses.value[idx] = {...editingExpense.value}; else expenses.value.push({...editingExpense.value}); showExpenseModal.value = false; };
+        const deleteExpense = () => { expenses.value = expenses.value.filter(e => e.id !== editingExpense.value.id); showExpenseModal.value = false; };
+        const deleteSpecificExpense = (id) => { expenses.value = expenses.value.filter(e => e.id !== id); };
+        const editExpense = (e) => openExpenseModal(e);
+
+        // --- Saving ---
+        const totalRequired = computed(() => expenses.value.reduce((sum, e) => { const req = (e.actual && e.actual > 0) ? e.actual : e.estimated; return sum + Number(req || 0); }, 0));
+        const totalSaved = computed(() => savings.value.reduce((sum, s) => sum + Number(s.amount), 0));
+        const remainingNeeded = computed(() => Math.max(0, totalRequired.value - totalSaved.value));
+        const sortedSavings = computed(() => savings.value.slice().sort((a,b) => new Date(b.date) - new Date(a.date)));
+
+        const showSavingModal = ref(false);
+        const emptySaving = { id: null, date: todayStr(), amount: 0, memo: '' };
+        const editingSaving = ref({...emptySaving});
+        const openSavingModal = (s=null) => { editingSaving.value = s ? {...s} : {...emptySaving, id: Date.now(), date: todayStr()}; showSavingModal.value = true; };
+        const saveSaving = () => { const idx = savings.value.findIndex(s => s.id === editingSaving.value.id); if(idx >= 0) savings.value[idx] = {...editingSaving.value}; else savings.value.push({...editingSaving.value}); showSavingModal.value = false; };
+        const deleteSaving = () => { savings.value = savings.value.filter(s => s.id !== editingSaving.value.id); showSavingModal.value = false; };
+        const deleteSpecificSaving = (id) => { savings.value = savings.value.filter(s => s.id !== id); };
+        const editSaving = (s) => openSavingModal(s);
+
+        // --- Gallery ---
+        const showGalleryModal = ref(false);
+        const galleryFilter = ref('all');
+        const galleryCategories = [{ label: 'すべて', value: 'all' }, { label: 'ドレス', value: 'dress' }, { label: 'ヘア', value: 'hair' }, { label: '装飾', value: 'deco' }, { label: '旅行', value: 'travel' }];
+        const newGalleryItem = ref({ id: null, category: 'dress', imageUrl: '', memo: '' });
+        const filteredGallery = computed(() => galleryFilter.value === 'all' ? gallery.value : gallery.value.filter(g => g.category === galleryFilter.value));
+        const openGalleryModal = () => { newGalleryItem.value = { id: Date.now(), category: 'dress', imageUrl: '', memo: '' }; showGalleryModal.value = true; };
+        const handleImageUpload = (e) => {
+          const file = e.target.files[0]; if(!file) return;
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            const img = new Image();
+            img.onload = () => {
+              const canvas = document.createElement('canvas'); const max = 600; let w = img.width, h = img.height;
+              if (w > h && w > max) { h *= max / w; w = max; } else if (h > max) { w *= max / h; h = max; }
+              canvas.width = w; canvas.height = h; canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+              newGalleryItem.value.imageUrl = canvas.toDataURL('image/jpeg', 0.7);
+            };
+            img.src = ev.target.result;
+          };
+          reader.readAsDataURL(file);
+        };
+        const saveImage = () => { gallery.value.unshift({...newGalleryItem.value}); showGalleryModal.value = false; };
+        const deleteImage = (id) => { gallery.value = gallery.value.filter(g => g.id !== id); };
+
+        // --- Settings & Share ---
+        const showSettingsModal = ref(false);
+        const showShareModal = ref(false);
+        const shareCodeInput = ref('');
+
+        const generateShareCode = async () => {
+          const data = { settings: settings.value, tasks: tasks.value, travels: travels.value, expenses: expenses.value, savings: savings.value, destinations: destinations.value };
+          try {
+            const jsonStr = JSON.stringify(data);
+            const code = btoa(encodeURIComponent(jsonStr));
+            await navigator.clipboard.writeText(code);
+            alert('同期コードをコピーしました！LINE等でパートナーに送ってください。');
+          } catch(e) { alert('コードのコピーに失敗しました。'); }
+        };
+
+        const importShareCode = () => {
+          if(!shareCodeInput.value) return;
+          try {
+            const jsonStr = decodeURIComponent(atob(shareCodeInput.value));
+            const data = JSON.parse(jsonStr);
+            if(data.settings) settings.value = data.settings;
+            if(data.tasks) tasks.value = data.tasks;
+            if(data.travels) travels.value = data.travels;
+            if(data.expenses) expenses.value = data.expenses;
+            if(data.savings) savings.value = data.savings;
+            if(data.destinations) destinations.value = data.destinations;
+            alert('パートナーのデータを反映しました！');
+            showShareModal.value = false;
+            shareCodeInput.value = '';
+          } catch(e) { alert('無効なコードです。正しく全てコピーできているか確認してください。'); }
+        };
+
+        onMounted(() => { renderCharts(); });
+
+        return {
+          activeTab, travelSubTab, destViewMode, navItems, settings, tasks, travels, expenses, gallery, savings, destinations,
+          formatNum, formatDate, getDaysUntil, daysUntilWedding, daysUntilHoneymoon,
+          weddingProgress, travelProgress, todayTasks, urgentTasks, weddingActual, travelActual, totalActual,
+          taskStatusTab, priorityBlocks, todoTasks, doneTasks, getTasksByPriority,
+          handleTouchStart, handleTouchMove, handleTouchEnd, safeClick,
+          showTaskModal, editingTask, openTaskModal, saveTask, deleteTask, deleteSpecificTask, editTask, toggleTask, isOverdue, clearDoneTasks,
+          showTravelModal, expandedDays, toggleDay, newTravelDay, editingTravelEvent, sortedTravels, openTravelModal, saveTravelDay, saveTravelEvent, deleteEvent, deleteTravelDay,
+          expandedDests, toggleDest, sortedDestinations, minDestCost, maxDestCost, getDestTotalCost, getDestDiffFromMin, getDestBarPercent,
+          showDestinationModal, showDestItemModal, editingDestination, editingDestItem, openDestinationModal, saveDestination, deleteDestination, deleteDest, openDestItemModal, saveDestItem, deleteDestItem,
+          showExpenseModal, editingExpense, openExpenseModal, saveExpense, deleteExpense, deleteSpecificExpense, editExpense,
+          totalRequired, totalSaved, remainingNeeded, sortedSavings,
+          showSavingModal, editingSaving, openSavingModal, saveSaving, deleteSaving, deleteSpecificSaving, editSaving,
+          showGalleryModal, galleryFilter, galleryCategories, filteredGallery, newGalleryItem, openGalleryModal, handleImageUpload, saveImage, deleteImage,
+          showSettingsModal, showShareModal, shareCodeInput, generateShareCode, importShareCode
+        };
+      }
+    };
+    createApp(App).mount('#app');
+  </script>
+</body>
+</html>
