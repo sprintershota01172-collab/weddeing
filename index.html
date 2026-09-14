@@ -69,42 +69,27 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; }
     
-    html {
-        /* 最下部の隙間が白くなるのを防ぐためのベースカラー */
-        background-color: #0077B6;
-        height: 100%;
-        width: 100%;
-        overflow: hidden;
-    }
-    body { 
-        background-image: linear-gradient(135deg, #48CAE4 0%, #0077B6 100%);
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        -webkit-tap-highlight-color: transparent; 
+    html, body { 
         margin: 0; 
         padding: 0; 
+        width: 100%;
+        height: 100%; /* 100%に固定してOSのバグを回避 */
         overflow: hidden; 
-        height: 100%; 
-        width: 100%; 
-        color: #03045E; 
-        /* iOS Safari特有の画面全体のずり上がりを防ぐために固定 */
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        overscroll-behavior: none;
+        background-color: #0077B6;
+        -webkit-tap-highlight-color: transparent;
+        overscroll-behavior: none; /* 画面全体のバウンスを無効化 */
     }
+    
     .app-container { 
-        /* 画面サイズにピッタリ固定する */
-        height: 100%; 
-        height: 100dvh; 
+        width: 100%;
+        height: 100%;
         display: flex; 
         flex-direction: column; 
         position: relative; 
         overflow: hidden; 
+        background-image: linear-gradient(135deg, #48CAE4 0%, #0077B6 100%);
     }
+
     .hide-scroll { scroll-behavior: smooth; }
     .hide-scroll::-webkit-scrollbar { display: none; }
     .fade-enter-active, .fade-leave-active { transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -125,15 +110,17 @@
     .glass-nav { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.7); box-shadow: 0 -10px 40px rgba(0, 119, 182, 0.15); }
     .glass-panel { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.8); }
     
-    .safe-pb { padding-bottom: env(safe-area-inset-bottom, 12px); }
-    .safe-pt { padding-top: env(safe-area-inset-top, 0px); }
+    /* 上部ステータスバー・カメラ島へのめり込みを防ぐために最低値を高めに確保 */
+    .safe-pt { padding-top: max(env(safe-area-inset-top), 48px); }
+    .safe-pb { padding-bottom: max(env(safe-area-inset-bottom), 20px); }
+    
     input, textarea, select { outline: none; width: 100%; max-width: 100%; margin: 0; font-family: inherit; color: #03045E; background-color: rgba(255,255,255,0.7); }
     .break-words { word-wrap: break-word; overflow-wrap: break-word; }
   </style>
 </head>
 <body class="text-theme-text font-sans antialiased selection:bg-theme-primaryLight">
 
-  <div id="app" class="max-w-md mx-auto app-container shadow-2xl relative">
+  <div id="app" class="max-w-md mx-auto app-container shadow-2xl">
     
     <!-- HEADER -->
     <header class="glass z-40 px-5 py-3 flex justify-between items-center flex-shrink-0 safe-pt shadow-sm rounded-b-3xl mx-2 mt-2">
@@ -783,7 +770,7 @@
     </transition>
 
     <!-- Floating Bottom Navigation -->
-    <nav class="fixed bottom-3 left-4 right-4 z-40 safe-pb max-w-md mx-auto">
+    <nav class="absolute bottom-3 left-4 right-4 z-40 safe-pb max-w-md mx-auto">
       <div class="glass-nav rounded-[24px] flex justify-around items-center h-[60px] px-2">
         <button v-for="nav in navItems" :key="nav.id" @click="activeTab = nav.id" class="relative flex flex-col items-center justify-center w-full h-full space-y-0.5 transition-all duration-300" :class="activeTab === nav.id ? 'text-theme-primary' : 'text-theme-subtext hover:text-theme-text'">
           <div class="relative flex items-center justify-center w-8 h-7 rounded-full transition-all duration-300" :class="activeTab === nav.id ? 'bg-theme-primaryLight/30' : ''"><i :class="[nav.icon, 'text-[15px] transition-transform duration-300', activeTab === nav.id ? 'scale-110' : '']"></i></div>
@@ -1629,7 +1616,42 @@
           } catch(e) { alert('無効なコードです。正しく全てコピーできているか確認してください。'); }
         };
 
-        onMounted(() => { renderCharts(); });
+        onMounted(() => { 
+          renderCharts(); 
+          
+          // iOS PWA特有の、画面全体が上にずり上がるバグを完全に固定する
+          const lockScroll = () => {
+            if (window.scrollY > 0 || document.body.scrollTop > 0) {
+              window.scrollTo(0, 0);
+              document.body.scrollTop = 0;
+              document.documentElement.scrollTop = 0;
+            }
+          };
+
+          // 全体スクロールが発生した瞬間に強制リセット
+          window.addEventListener('scroll', lockScroll);
+          
+          // キーボード開閉時などのフォーカスアウト時にも戻す（念のため時間差で3回）
+          document.addEventListener('focusout', () => {
+            setTimeout(lockScroll, 10);
+            setTimeout(lockScroll, 100);
+            setTimeout(lockScroll, 300);
+          });
+
+          // 画面全体のスワイプによるバウンスをブロック（※スクロール可能領域内は許可）
+          document.addEventListener('touchmove', function(e) {
+            let target = e.target;
+            while (target && target !== document.body) {
+              const style = window.getComputedStyle(target);
+              if (style.overflowY === 'auto' || style.overflowY === 'scroll' || style.overflowX === 'auto' || style.overflowX === 'scroll') {
+                return; // スクロール領域でのスワイプは許可
+              }
+              target = target.parentNode;
+            }
+            // それ以外（背景など）をスワイプした場合は画面全体を引っ張らせない
+            e.preventDefault(); 
+          }, { passive: false });
+        });
 
         return {
           activeTab, travelSubTab, destViewMode, navItems, settings, calcTotalBudget, getCategoryDef, getActualByCategory, tasks, travels, expenses, gallery, savings, destinations,
